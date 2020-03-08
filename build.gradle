@@ -1,0 +1,152 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version "1.3.50" apply false
+    id 'org.springframework.boot' version '2.2.1.RELEASE' apply false
+    id 'io.spring.dependency-management' version '1.0.8.RELEASE' apply false
+}
+
+allprojects {
+    apply plugin: 'idea'
+    idea {
+        module {
+            outputDir file('build/classes/main')
+            testOutputDir file('build/classes/test')
+        }
+    }
+}
+
+subprojects {
+    repositories {
+        jcenter()
+        mavenCentral()
+        mavenLocal()
+    }
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'kotlin'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'maven-publish'
+    apply plugin: 'signing'
+
+    group 'dev.niubi.commons'
+    version '0.1-SNAPSHOT'
+    sourceCompatibility = '1.8'
+
+    dependencies {
+        api("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+        api("org.jetbrains.kotlin:kotlin-stdlib")
+        api("org.jetbrains.kotlin:kotlin-reflect")
+        annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+        compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
+
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+
+        testImplementation "junit:junit:4.12"
+        testImplementation "org.springframework.boot:spring-boot-starter-test"
+    }
+    compileKotlin {
+        kotlinOptions {
+            freeCompilerArgs = ['-Xjsr305=strict', '-Xjvm-default=enable']
+            jvmTarget = '1.8'
+        }
+        incremental = true
+    }
+    compileTestKotlin {
+        kotlinOptions {
+            freeCompilerArgs = ['-Xjsr305=strict', '-Xjvm-default=enable']
+            jvmTarget = '1.8'
+        }
+    }
+    compileJava {
+        dependsOn(processResources)
+        options.incremental = true
+        options.encoding = 'UTF-8'
+        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+    }
+//    dependencyManagement {
+//        imports {
+//            mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+//        }
+//    }
+//    uploadArchives {
+//        repositories {
+//            mavenDeployer {
+//                repository(url: mavenLocal().url.toURL())
+//            }
+//        }
+//
+//    }
+
+    task sourcesJar(type: Jar) {
+        from sourceSets.main.allSource
+        archiveClassifier.set('sources')
+    }
+//    task javadocJar(type: Jar) {
+//        from javadoc
+//        archiveClassifier = 'javadoc'
+//    }
+    publishing {
+        publications {
+            mavenCentral(MavenPublication) {
+                pom {
+                    name = 'niubi-commons'
+                    description = '基于SpringMvc和Security权限管理'
+                    url = 'https://github.com/chenzhenjia/niubi-commons'
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'chzhenjia'
+                            name = '陈圳佳'
+                            email = 'chzhenjia@gmail.com'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:https://github.com/chenzhenjia/niubi-commons.git'
+                        developerConnection = 'scm:https://github.com/chenzhenjia/niubi-commons.git'
+                        url = 'https://github.com/chenzhenjia/niubi-commons'
+                    }
+                }
+                version = jar.archiveVersion.get()
+                artifactId = jar.archiveBaseName.get()
+                from components.java
+                artifact sourcesJar
+                ext.repo = 'mavenCentral'
+            }
+        }
+        repositories {
+            maven {
+                name = 'mavenCentral'
+                credentials {
+                    username = mavenCentralUsername
+                    password = mavenCentralPassword
+                }
+                def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+                def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
+                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            }
+        }
+    }
+    bootJar.configure {
+        enabled = false
+    }
+    jar {
+        enabled = true
+    }
+    signing {
+        sign publishing.publications.mavenCentral
+    }
+    afterEvaluate {
+        tasks.withType(PublishToMavenRepository) { task ->
+            if (task.publication.hasProperty('repo') && task.publication.repo != task.repository.name) {
+                task.enabled = false
+                task.group = null
+            }
+        }
+    }
+}

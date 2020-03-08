@@ -1,0 +1,11 @@
+
+dependencies {
+    compile "org.springframework.boot:spring-boot-starter-web"
+    compile "org.springframework.boot:spring-boot-starter-security"
+    compile Libs.jose4j
+    compile Libs.javaJWT
+    compile Libs.fastjson
+    
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+compileJava.dependsOn(processResources)

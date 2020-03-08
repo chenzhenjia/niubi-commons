@@ -1,0 +1,3 @@
+rootProject.name = 'niubi-commons'
+include 'core', 'security', 'web'
+
