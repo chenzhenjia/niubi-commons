@@ -15,6 +15,26 @@ import java.util.Arrays;
 /**
  * @author chenzhenjia
  * @since 2019/11/21
+ * <pre>
+ * {@code
+ * @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
+ * @Configuration
+ * public class GlobalMethodConfiguration extends PermissionMethodSecurityConfiguration {
+ *     private PermissionService permissionService;
+ *
+ *     @Resource
+ *     public void setPermissionService(PermissionService permissionService) {
+ *         this.permissionService = permissionService;
+ *     }
+ *
+ *     @Override
+ *     protected PermissionVoter permissionVoter() {
+ *         return new PermissionVoter(permissionService);
+ *     }
+ *
+ * }
+ * }
+ * </pre>
  */
 public abstract class PermissionMethodSecurityConfiguration extends GlobalMethodSecurityConfiguration {
 

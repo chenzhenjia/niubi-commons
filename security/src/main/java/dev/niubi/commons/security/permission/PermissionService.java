@@ -4,6 +4,20 @@ import java.util.Set;
 
 /**
  * 加载用户所属权限的接口
+ * <pre>
+ * {@code
+ * @Component
+ * public class CachePermissionService implements PermissionService {
+ *     @Override
+ *     @Transactional(readOnly = true)
+ *     @Cacheable(value = "permission", key = "#username")
+ *     public Set<String> loadByUsername(String username) {
+ *         // query database load user permission
+ *         return Collections.emptySet();
+ *     }
+ * }
+ * }
+ * </pre>
  *
  * @author chenzhenjia
  * @since 2019-07-13
