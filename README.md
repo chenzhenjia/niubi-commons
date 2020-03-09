@@ -1,6 +1,21 @@
 # niubi-commons
-个人的一个公共项目,基于 SpringBoot,SpringSecurity,Jpa 开发的功能
+个人的一个公共项目,基于 SpringBoot,SpringSecurity,Jpa 开发的功能.
 ## core
+### 在项目中引用
+由于现在是 snapshots 的,所以先配置 maven 的地址为 `https://oss.sonatype.org/content/repositories/snapshots`
+* maven
+```xml
+<dependency>
+  <groupId>dev.niubi.commons</groupId>
+  <artifactId>core</artifactId>
+  <version>last-version</version>
+</dependency>
+```
+* gradle
+```groovy
+compile group: 'dev.niubi.commons', name: 'core', version: 'last-version'
+```
+### 使用
 * jpa converter
     1. `ListStringToBlobConverter` 把 list 字符串转为数据库的 Blob 类型的值
         ```java
@@ -49,6 +64,20 @@
         }
         ```
 ## security
+### 在项目中引用
+* maven
+```xml
+<dependency>
+  <groupId>dev.niubi.commons</groupId>
+  <artifactId>security</artifactId>
+  <version>last-version</version>
+</dependency>
+```
+* gradle
+```groovy
+compile group: 'dev.niubi.commons', name: 'security', version: 'last-version'
+```
+### 使用
 * permission
 1. 实现 PermissionService 
 在 loadByUsername 中查询数据库根据用户名获取当前用户的权限,建议做缓存处理
