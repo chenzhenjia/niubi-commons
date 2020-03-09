@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  dev.niubi.commons.security.configurer.jwt.JwtPropertiesAutoConfiguration
+  dev.niubi.commons.security.permission.PermissionAutoConfiguration

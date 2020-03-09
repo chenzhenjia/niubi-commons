@@ -1,6 +1,5 @@
 package dev.niubi.commons.security.permission;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.expression.method.ExpressionBasedPreInvocationAdvice;
 import org.springframework.security.access.method.MethodSecurityMetadataSource;
@@ -53,11 +52,5 @@ public abstract class PermissionMethodSecurityConfiguration extends GlobalMethod
     }
 
     protected abstract PermissionVoter permissionVoter();
-
-
-    @Bean
-    public PermissionRequestContainer permissionContainer() {
-        return new PermissionRequestContainer();
-    }
 
 }
