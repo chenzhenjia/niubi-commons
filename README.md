@@ -1,5 +1,5 @@
 # niubi-commons
-[![GitHub license][license-badge]](LICENSE)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 个人的一个开源项目项目,基于 SpringBoot,SpringSecurity,Jpa 开发的功能.
 有 jpa 的 converter,还有 Security 的基于注解的接口权限拦截
