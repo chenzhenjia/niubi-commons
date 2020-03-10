@@ -1,8 +1,13 @@
 # niubi-commons
-个人的一个公共项目,基于 SpringBoot,SpringSecurity,Jpa 开发的功能.
+[![GitHub license][license-badge]](LICENSE)
+
+个人的一个开源项目项目,基于 SpringBoot,SpringSecurity,Jpa 开发的功能.
+有 jpa 的 converter,还有 Security 的基于注解的接口权限拦截
 ## core
 ### 在项目中引用
 由于现在是 snapshots 的,所以先配置 maven 的地址为 `https://oss.sonatype.org/content/repositories/snapshots`
+
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/dev.niubi.commons/core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/dev.niubi.commons/core)
 * maven
 ```xml
 <dependency>
@@ -65,6 +70,7 @@ compile group: 'dev.niubi.commons', name: 'core', version: 'last-version'
         ```
 ## security
 ### 在项目中引用
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/dev.niubi.commons/security/badge.svg)](https://maven-badges.herokuapp.com/maven-central/dev.niubi.commons/security)
 * maven
 ```xml
 <dependency>
