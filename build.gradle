@@ -29,7 +29,7 @@ subprojects {
     apply plugin: 'signing'
 
     group 'dev.niubi.commons'
-    version '0.1-SNAPSHOT'
+    version '0.1'
     sourceCompatibility = '1.8'
 
     dependencies {
