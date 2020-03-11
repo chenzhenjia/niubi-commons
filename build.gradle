@@ -82,10 +82,10 @@ subprojects {
         from sourceSets.main.allSource
         archiveClassifier.set('sources')
     }
-//    task javadocJar(type: Jar) {
-//        from javadoc
-//        archiveClassifier = 'javadoc'
-//    }
+    task javadocJar(type: Jar) {
+        from javadoc
+        archiveClassifier.set('javadoc')
+    }
     publishing {
         publications {
             mavenCentral(MavenPublication) {
@@ -116,6 +116,7 @@ subprojects {
                 artifactId = jar.archiveBaseName.get()
                 from components.java
                 artifact sourcesJar
+                artifact javadocJar
                 ext.repo = 'mavenCentral'
             }
         }
@@ -138,6 +139,13 @@ subprojects {
     jar {
         enabled = true
     }
+     javadoc {
+         failOnError false
+         options.addStringOption('Xdoclint:none', '-quiet')
+         options.addStringOption('encoding', 'UTF-8')
+         options.addStringOption('charSet', 'UTF-8')
+    }
+
     signing {
         sign publishing.publications.mavenCentral
     }
