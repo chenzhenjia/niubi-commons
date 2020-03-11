@@ -31,23 +31,21 @@ import java.util.Arrays;
  * @author chenzhenjia
  * @since 2019/11/21
  * <pre>
- * {@code
- * @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
- * @Configuration
+ * &#64;EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
+ * &#64;Configuration
  * public class GlobalMethodConfiguration extends PermissionMethodSecurityConfiguration {
  *     private PermissionService permissionService;
  *
- *     @Resource
+ *     &#64;Resource
  *     public void setPermissionService(PermissionService permissionService) {
  *         this.permissionService = permissionService;
  *     }
  *
- *     @Override
+ *     &#64;Override
  *     protected PermissionVoter permissionVoter() {
  *         return new PermissionVoter(permissionService);
  *     }
  *
- * }
  * }
  * </pre>
  */

@@ -27,21 +27,16 @@ import java.lang.annotation.Target;
  * @author chenzhenjia
  * @since 2019/11/21
  * <pre>
- * {@code
- * @RestController
- * @Permission(tag = "添加管理员", value = {"admin:user"})
- * @RequestMapping("user")
+ * &#64;RestController
+ * &#64;Permission(tag = "添加管理员", value = {"admin:user"})
+ * &#64;RequestMapping("user")
  * public class UserCtrl {
  *
- *     @PostMapping
- *     @Permission(
- *       tag = "添加管理员",
- *       value = {"admin:user:post"}
- *     )
- *     public Response<?> add(@RequestBody @Validated AdminUserIn addIn) {
- *         return Response.ok();
- *     }
- * }
+ *  &#64;PostMapping
+ *  &#64;Permission(tag = "添加管理员", value = {"admin:user:post"})
+ *  public Response<?> add(@RequestBody @Validated AdminUserIn addIn) {
+ *      return Response.ok();
+ *  }
  * }
  * </pre>
  */
