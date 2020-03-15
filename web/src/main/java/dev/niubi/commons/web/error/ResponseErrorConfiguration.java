@@ -20,6 +20,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorViewResolver;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
@@ -39,6 +40,7 @@ import dev.niubi.commons.web.error.support.DefaultResponseErrorCustomizer;
  * @since 2019/11/21
  */
 @Configuration
+@ConditionalOnWebApplication
 public class ResponseErrorConfiguration {
     private final ServerProperties serverProperties;
     private final List<ErrorViewResolver> errorViewResolvers;
