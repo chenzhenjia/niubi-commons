@@ -1,9 +1,19 @@
-
+java {
+    registerFeature('optional') {
+        usingSourceSet(sourceSets.main)
+    }
+}
 dependencies {
     api project(':core')
     compile Libs.fastjson
     compile Libs.commonsCollections
 
-    implementation "org.springframework.security:spring-security-config"
-    compile "org.springframework.boot:spring-boot-starter-web"
+    optionalImplementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
+    optionalImplementation("com.fasterxml.jackson.datatype:jackson-datatype-hibernate5")
+    optionalImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
+    optionalImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+
+    optionalImplementation "org.springframework.security:spring-security-config"
+    optionalImplementation "org.springframework.boot:spring-boot-starter-data-jpa"
+    optionalImplementation "org.springframework.boot:spring-boot-starter-web"
 }
