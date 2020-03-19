@@ -29,13 +29,17 @@ subprojects {
     apply plugin: 'signing'
 
     group 'dev.niubi.commons'
-    version '0.2'
+    version '0.3'
     sourceCompatibility = '1.8'
-
+    java {
+        registerFeature('optional') {
+            usingSourceSet(sourceSets.main)
+        }
+    }
     dependencies {
-        api("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-        api("org.jetbrains.kotlin:kotlin-stdlib")
-        api("org.jetbrains.kotlin:kotlin-reflect")
+        optionalImplementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+        optionalImplementation("org.jetbrains.kotlin:kotlin-stdlib")
+        optionalImplementation("org.jetbrains.kotlin:kotlin-reflect")
         annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
         compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
 

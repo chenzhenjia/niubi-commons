@@ -1,8 +1,4 @@
-java {
-    registerFeature('optional') {
-        usingSourceSet(sourceSets.main)
-    }
-}
+
 dependencies {
     api project(':core')
     compile Libs.fastjson
