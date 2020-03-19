@@ -32,9 +32,12 @@ public class NiubiWebMvcConfiguration {
     /**
      * 让 Spring Data 的 Pageable 的分页从第一页开始 <br/> {@link org.springframework.data.domain.Pageable}
      */
-    @Bean
+    @Configuration
     @ConditionalOnClass(PageableHandlerMethodArgumentResolverCustomizer.class)
-    public PageableHandlerMethodArgumentResolverCustomizer pageableResolverCustomizer() {
-        return pageableResolver -> pageableResolver.setOneIndexedParameters(true);
+    public static class PageableResolverCustomizerConfiguration {
+        @Bean
+        public PageableHandlerMethodArgumentResolverCustomizer pageableResolverCustomizer() {
+            return pageableResolver -> pageableResolver.setOneIndexedParameters(true);
+        }
     }
 }
