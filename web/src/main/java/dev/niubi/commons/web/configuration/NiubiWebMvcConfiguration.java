@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.config.PageableHandlerMethodArgumentResolverCustomizer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.data.domain.Pageable;
 
 /**
  * @author chenzhenjia
@@ -30,7 +31,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @ConditionalOnClass(WebMvcConfigurer.class)
 public class NiubiWebMvcConfiguration {
     /**
-     * 让 Spring Data 的 Pageable 的分页从第一页开始 <br/> {@link org.springframework.data.domain.Pageable}
+     * 让 Spring Data 的 Pageable 的分页从第一页开始 <br/> {@link Pageable}
      */
     @Configuration
     @ConditionalOnClass(PageableHandlerMethodArgumentResolverCustomizer.class)
