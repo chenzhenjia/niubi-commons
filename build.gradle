@@ -35,6 +35,8 @@ subprojects {
         registerFeature('optional') {
             usingSourceSet(sourceSets.main)
         }
+        withJavadocJar()
+        withSourcesJar()
     }
     dependencies {
         optionalImplementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
@@ -68,97 +70,33 @@ subprojects {
         options.encoding = 'UTF-8'
         options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
     }
-//    dependencyManagement {
-//        imports {
-//            mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
-//        }
-//    }
-//    uploadArchives {
-//        repositories {
-//            mavenDeployer {
-//                repository(url: mavenLocal().url.toURL())
-//            }
-//        }
-//
-//    }
 
-    task sourcesJar(type: Jar) {
-        from sourceSets.main.allSource
-        archiveClassifier.set('sources')
-    }
-    task javadocJar(type: Jar) {
-        from javadoc
-        archiveClassifier.set('javadoc')
-    }
-    publishing {
-        publications {
-            mavenCentral(MavenPublication) {
-                pom {
-                    name = 'niubi-commons'
-                    description = '基于SpringMvc和Security权限管理'
-                    url = 'https://github.com/chenzhenjia/niubi-commons'
-                    licenses {
-                        license {
-                            name = 'The Apache License, Version 2.0'
-                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        }
-                    }
-                    developers {
-                        developer {
-                            id = 'chzhenjia'
-                            name = '陈圳佳'
-                            email = 'chzhenjia@gmail.com'
-                        }
-                    }
-                    scm {
-                        connection = 'scm:https://github.com/chenzhenjia/niubi-commons.git'
-                        developerConnection = 'scm:https://github.com/chenzhenjia/niubi-commons.git'
-                        url = 'https://github.com/chenzhenjia/niubi-commons'
-                    }
-                }
-                version = jar.archiveVersion.get()
-                artifactId = jar.archiveBaseName.get()
-                from components.java
-                artifact sourcesJar
-                artifact javadocJar
-                ext.repo = 'mavenCentral'
-            }
-        }
-        repositories {
-            maven {
-                name = 'mavenCentral'
-                credentials {
-                    username = mavenCentralUsername
-                    password = mavenCentralPassword
-                }
-                def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
-                def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
-                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-            }
-        }
-    }
+//    task sourcesJar(type: Jar) {
+//        from sourceSets.main.allSource
+//        archiveClassifier.set('sources')
+//    }
+//    task javadocJar(type: Jar) {
+//        from javadoc
+//        archiveClassifier.set('javadoc')
+//    }
     bootJar.configure {
         enabled = false
     }
     jar {
         enabled = true
     }
-     javadoc {
-         failOnError false
-         options.addStringOption('Xdoclint:none', '-quiet')
-         options.addStringOption('encoding', 'UTF-8')
-         options.addStringOption('charSet', 'UTF-8')
+    javadoc {
+        failOnError false
+        options.addStringOption('Xdoclint:none', '-quiet')
+        options.addStringOption('encoding', 'UTF-8')
+        options.addStringOption('charSet', 'UTF-8')
     }
-
-    signing {
-        sign publishing.publications.mavenCentral
-    }
-    afterEvaluate {
-        tasks.withType(PublishToMavenRepository) { task ->
-            if (task.publication.hasProperty('repo') && task.publication.repo != task.repository.name) {
-                task.enabled = false
-                task.group = null
-            }
-        }
-    }
+//    afterEvaluate {
+//        tasks.withType(PublishToMavenRepository) { task ->
+//            if (task.publication.hasProperty('repo') && task.publication.repo != task.repository.name) {
+//                task.enabled = false
+//                task.group = null
+//            }
+//        }
+//    }
 }

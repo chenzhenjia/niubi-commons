@@ -1,0 +1,74 @@
+/*
+ * Copyright 2020 陈圳佳
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'niubi-commons'
+                description = '基于SpringMvc和Security权限管理'
+                url = 'https://github.com/chenzhenjia/niubi-commons'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'chzhenjia'
+                        name = '陈圳佳'
+                        email = 'chzhenjia@gmail.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:https://github.com/chenzhenjia/niubi-commons.git'
+                    developerConnection = 'scm:https://github.com/chenzhenjia/niubi-commons.git'
+                    url = 'https://github.com/chenzhenjia/niubi-commons'
+                }
+            }
+//            groupId project.group
+//            artifactId project.name
+//            version project.version
+//            version = jar.archiveVersion.get()
+//            artifactId = jar.archiveBaseName.get()
+//            afterEvaluate {
+//                version = jar.archiveVersion.get()
+//                artifactId = jar.archiveBaseName.get()
+//            }
+            from components.java
+//            ext.repo = 'maven'
+        }
+    }
+    repositories {
+        maven {
+            name = 'maven'
+            credentials {
+                username = mavenCentralUsername
+                password = mavenCentralPassword
+            }
+            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        }
+    }
+}
+signing {
+    sign publishing.publications.mavenJava
+}

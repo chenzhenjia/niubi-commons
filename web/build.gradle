@@ -1,8 +1,7 @@
-
+apply from: '../gradle/publish.gradle'
 dependencies {
     api project(':core')
-    compile Libs.fastjson
-    compile Libs.commonsCollections
+    api "commons-collections:commons-collections:${commonsCollectionsVersion}"
 
     optionalImplementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
     optionalImplementation("com.fasterxml.jackson.datatype:jackson-datatype-hibernate5")
