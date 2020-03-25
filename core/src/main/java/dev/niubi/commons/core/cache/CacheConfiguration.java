@@ -52,17 +52,21 @@ public class CacheConfiguration {
     @Bean
     public RedisCacheManagerBuilderCustomizer niuBiRedisCacheManagerBuilderCustomizer() {
         return builder -> {
-            CacheProperties.Redis defaultConfig = cacheProperties.getRedis()
-                    .get("default");
+            Map<String, CacheProperties.Redis> redisMap = cacheProperties.getRedis();
+            if (Objects.isNull(redisMap)) {
+                return;
+            }
+            CacheProperties.Redis defaultConfig = redisMap
+              .get("default");
             if (Objects.nonNull(defaultConfig)) {
                 builder.cacheDefaults(redisCacheConfiguration(defaultConfig));
             }
 
-            Map<String, RedisCacheConfiguration> configs = cacheProperties.getRedis()
-                    .entrySet()
-                    .stream()
-                    .filter(en -> !en.getKey().equals("default"))
-                    .collect(Collectors.toMap(Map.Entry::getKey, en -> redisCacheConfiguration(en.getValue())));
+            Map<String, RedisCacheConfiguration> configs = redisMap
+              .entrySet()
+              .stream()
+              .filter(en -> !en.getKey().equals("default"))
+              .collect(Collectors.toMap(Map.Entry::getKey, en -> redisCacheConfiguration(en.getValue())));
             builder.withInitialCacheConfigurations(configs);
         };
     }
@@ -71,16 +75,16 @@ public class CacheConfiguration {
         RedisCacheConfiguration config = defaultCacheConfig();
         RedisCacheConfiguration finalConfig = config;
         config = Optional.ofNullable(redisProperties.getKeyPrefix())
-                .map(it -> finalConfig.computePrefixWith(cacheName -> it + "::" + cacheName + "::"))
-                .orElse(config)
+          .map(it -> finalConfig.computePrefixWith(cacheName -> it + "::" + cacheName + "::"))
+          .orElse(config)
         ;
         config = Optional.ofNullable(redisProperties.getTimeToLive())
-                .map(config::entryTtl)
-                .orElse(config)
+          .map(config::entryTtl)
+          .orElse(config)
         ;
         config = Optional.ofNullable(redisProperties.getTimeToLive())
-                .map(config::entryTtl)
-                .orElse(config)
+          .map(config::entryTtl)
+          .orElse(config)
         ;
         if (!redisProperties.isCacheNullValues()) {
             config = config.disableCachingNullValues();
