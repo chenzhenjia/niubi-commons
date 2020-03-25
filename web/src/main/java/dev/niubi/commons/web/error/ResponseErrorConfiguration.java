@@ -16,6 +16,8 @@
 
 package dev.niubi.commons.web.error;
 
+import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException;
+
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -56,7 +58,7 @@ public class ResponseErrorConfiguration {
     public ResponseErrorController responseErrorController(ErrorAttributes errorAttributes,
                                                            ResponseErrorCustomizer responseErrorCustomizer) {
         return new ResponseErrorController(errorAttributes, this.serverProperties.getError(),
-                this.errorViewResolvers, responseErrorCustomizer);
+          this.errorViewResolvers, responseErrorCustomizer);
     }
 
     @Bean
@@ -77,6 +79,20 @@ public class ResponseErrorConfiguration {
 
         public void configure(WebSecurity web) {
             web.ignoring().antMatchers(serverProperties.getError().getPath());
+        }
+    }
+
+    @Bean
+    public ExceptionsHandler exceptionsHandler() {
+        return new ExceptionsHandler();
+    }
+
+    @Configuration
+    @ConditionalOnClass(MissingKotlinParameterException.class)
+    public static class KotlinExceptionHandlerConfiguration {
+        @Bean
+        public KotlinExceptionHandler kotlinExceptionHandler() {
+            return new KotlinExceptionHandler();
         }
     }
 }

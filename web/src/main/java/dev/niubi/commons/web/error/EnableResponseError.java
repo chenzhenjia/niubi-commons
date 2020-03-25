@@ -16,6 +16,7 @@
 
 package dev.niubi.commons.web.error;
 
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.ElementType;
@@ -34,7 +35,7 @@ import kotlin.annotation.MustBeDocumented;
 @Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 @Retention(value = RetentionPolicy.RUNTIME)
 @MustBeDocumented
-@Import({ResponseErrorConfiguration.class, ExceptionsHandlerRegistrar.class})
+@Import({ResponseErrorConfiguration.class})
+@Configuration
 public @interface EnableResponseError {
-    boolean exceptionsHandler() default true;
 }

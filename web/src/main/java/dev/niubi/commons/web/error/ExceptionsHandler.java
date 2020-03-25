@@ -16,8 +16,6 @@
 
 package dev.niubi.commons.web.error;
 
-import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException;
-
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -71,12 +69,6 @@ public class ExceptionsHandler {
           .orElse(null);
         Response<Object> response = Response.business(BAD_REQUEST.value(), msg);
         response.putAllExtra(map);
-        return ResponseEntity.badRequest().body(response);
-    }
-
-    @ExceptionHandler(MissingKotlinParameterException.class)
-    public ResponseEntity<Response<?>> handleMissingKotlinParameter(MissingKotlinParameterException e) {
-        Response<Object> response = Response.business(BAD_REQUEST.value(), e.getMsg());
         return ResponseEntity.badRequest().body(response);
     }
 
