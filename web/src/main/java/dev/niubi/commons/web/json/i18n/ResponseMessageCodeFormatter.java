@@ -14,25 +14,15 @@
  * limitations under the License.
  */
 
-package dev.niubi.commons.core.exception;
+package dev.niubi.commons.web.json.i18n;
 
 /**
  * @author chenzhenjia
- * @since 2020/1/29
+ * @since 2020/4/12
  */
-public class BusinessException extends RuntimeException {
-    private Integer code = 0;
+public interface ResponseMessageCodeFormatter {
+    DefaultMsg defaultMsg();
 
-    public BusinessException() {
-        super("未知错误");
-    }
+    String getMsg(String msg);
 
-    public BusinessException(String message, Integer code) {
-        super(message);
-        this.code = code;
-    }
-
-    public Integer getCode() {
-        return code;
-    }
 }

@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import dev.niubi.commons.core.exception.BusinessException;
+import dev.niubi.commons.web.error.exception.BusinessException;
 import dev.niubi.commons.web.json.Response;
 import lombok.extern.slf4j.Slf4j;
 

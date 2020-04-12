@@ -41,7 +41,7 @@ import dev.niubi.commons.web.error.support.DefaultResponseErrorCustomizer;
  * @author chenzhenjia
  * @since 2019/11/21
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication
 public class ResponseErrorConfiguration {
     private final ServerProperties serverProperties;

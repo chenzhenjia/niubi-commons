@@ -17,8 +17,6 @@
 package dev.niubi.commons.web.json;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.jetbrains.annotations.NotNull;
@@ -28,8 +26,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * 公用返回对象
@@ -38,13 +38,13 @@ import lombok.Getter;
  * @since 2019/11/21
  */
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Response<T> {
     public static class Status {
         /**
          * 成功
          */
         public static final String SUCCESS = "ok";
+        static String SUCCESS_MSG = "";
         /**
          * 业务异常
          */
@@ -53,10 +53,15 @@ public class Response<T> {
          * 未知异常
          */
         public static final String UNKNOWN = "unknown";
+        static String UNKNOWN_MSG = "";
 
         public static final String NOT_FOUND = "notFound";
 
+        static String NOT_FOUND_MSG = "";
+
         public static final String DELETE_FAILURE = "deleteFailure";
+
+        static String DELETE_FAILURE_MSG = "";
     }
 
     /**
@@ -68,6 +73,7 @@ public class Response<T> {
     /**
      * 消息
      */
+    @Getter
     private String msg;
     /**
      * 内容
@@ -76,13 +82,14 @@ public class Response<T> {
     /**
      * 时间
      */
-    @JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
     private Date timestamp;
     /**
      * 返回的额外的数据
      */
     private Map<String, Object> extra;
-    public static final Response<Object> UNKNOWN = new Response<>(Status.UNKNOWN, null, "未知错误", null);
+    public static final Response<Object> UNKNOWN = new Response<>(Status.UNKNOWN, null, Status.UNKNOWN_MSG, null);
 
     @JsonCreator
     public Response(@JsonProperty("status") String status, @JsonProperty("code") Integer code,
@@ -91,7 +98,6 @@ public class Response<T> {
         this.status = status;
         this.msg = msg;
         this.body = body;
-        this.timestamp = new Date();
         this.code = code;
         this.extra = extra;
     }
@@ -146,15 +152,15 @@ public class Response<T> {
     }
 
     public static <T> Response<T> ok(T body) {
-        return ok(body, "成功");
+        return ok(body, Status.SUCCESS_MSG);
     }
 
     public static <T> Response<T> ok() {
-        return ok(null, "成功");
+        return ok(null);
     }
 
     public static <T> Response<T> deleteFailure() {
-        return deleteFailure("删除失败", null);
+        return deleteFailure(null);
     }
 
     public static <T> Response<T> deleteFailure(String msg) {
@@ -166,7 +172,7 @@ public class Response<T> {
     }
 
     public static <T> Response<T> deleteFailure(T body) {
-        return deleteFailure("删除失败", body);
+        return deleteFailure(Status.DELETE_FAILURE_MSG, body);
     }
 
     public static <T> Response<T> business(Integer status, String msg, T body) {
@@ -210,7 +216,7 @@ public class Response<T> {
     }
 
     public static <T> Response<T> notfound() {
-        return notfound("资源不存在");
+        return notfound(Status.DELETE_FAILURE_MSG);
     }
 
     @SuppressWarnings("unchecked")

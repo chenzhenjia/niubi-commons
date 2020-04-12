@@ -1,3 +1,4 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   dev.niubi.commons.web.configuration.NiubiWebMvcConfiguration,\
-  dev.niubi.commons.web.configuration.NiubiJacksonConfiguration
+  dev.niubi.commons.web.configuration.NiubiJacksonConfiguration,\
+  dev.niubi.commons.web.json.ResponseConfiguration
