@@ -32,8 +32,6 @@ subprojects {
     apply(plugin = "maven-publish")
     apply(plugin = "signing")
 
-    group = "dev.niubi.commons"
-    version = "0.5"
     configure<JavaPluginConvention> {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -138,16 +136,24 @@ subprojects {
         repositories {
             maven {
                 credentials {
-                    username = "${properties["mavenCentralUsername"]}"
-                    password = "${properties["mavenCentralPassword"]}"
+                    val mavenCentralUsername: String? by project
+                    val mavenCentralPassword: String? by project
+                    username = mavenCentralUsername
+                    password = mavenCentralPassword
                 }
                 val releasesRepoUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
                 val snapshotsRepoUrl = uri("https://oss.sonatype.org/content/repositories/snapshots")
-                url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
+                url = if ("$version".endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
             }
         }
     }
     signing {
+        if (project.hasProperty("isCI")) {
+            val signingKeyId: String? = properties["signing.keyId"]?.toString()
+            val signingPassword: String? = properties["signing.password"]?.toString()
+            val signingKey: String? by project
+            useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+        }
         sign(publishing.publications["mavenJava"])
     }
 }
