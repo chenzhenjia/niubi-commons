@@ -72,17 +72,16 @@ subprojects {
             options.compilerArgs.add("-Xlint:unchecked")
             options.compilerArgs.add("-Xlint:deprecation")
         }
-        withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
-            enabled = false
-        }
-        withType<Jar> {
-            enabled = true
-        }
         withType<Javadoc> {
             isFailOnError = false
             options.encoding = "UTF-8"
         }
     }
+    val jar: Jar by tasks
+    val bootJar: org.springframework.boot.gradle.tasks.bundling.BootJar by tasks
+
+    bootJar.enabled = false
+    jar.enabled = true
 //    afterEvaluate {
 //        tasks.withType(PublishToMavenRepository) { task ->
 //            if (task.publication.hasProperty('repo') && task.publication.repo != task.repository.name) {
