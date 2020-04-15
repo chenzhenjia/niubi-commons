@@ -148,8 +148,8 @@ subprojects {
     }
     signing {
         if (project.hasProperty("isCI")) {
-            val signingKeyId: String? = properties["signing.keyId"]?.toString()
-            val signingPassword: String? = properties["signing.password"]?.toString()
+            val signingKeyId: String? by project
+            val signingPassword: String? by project
             val signingKey: String? by project
             useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
         }
