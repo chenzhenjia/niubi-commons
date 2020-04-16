@@ -25,6 +25,7 @@ jobs:
       - name: Publish to Nexus
         run: ./gradlew publish -PisCI=true
         env:
+          ORG_GRADLE_PROJECT_releaseVersion: ${{ steps.vars.outputs.tag }}
           ORG_GRADLE_PROJECT_signingKeyId: ${{ secrets.signingKeyId }}
           ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.signingPassword }}
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.signingKey }}
