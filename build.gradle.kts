@@ -48,8 +48,8 @@ subprojects {
     apply(plugin = "maven-publish")
     apply(plugin = "signing")
     if (project.hasProperty("isCI")) {
-        val releaseVersion: String by project
-        version = releaseVersion
+        val releaseVersion: String? by project
+        version = releaseVersion ?: properties["version"]!!
     }
     configure<JavaPluginConvention> {
         sourceCompatibility = JavaVersion.VERSION_1_8
