@@ -34,12 +34,10 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 自定义 hibernate 的 String 转 List<String> 的 converter,对应数据库的 varchar 类型
  * <pre>
- * {@code
- * @Entity
+ * &#64;Entity
  * public class ExampleEntity {
- *     @Convert(converter = ListStringToTextConverter.class)
+ *     &#64;Convert(converter = ListStringToTextConverter.class)
  *     private Type type;
- * }
  * }
  * </pre>
  *

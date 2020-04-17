@@ -26,7 +26,6 @@ import javax.persistence.AttributeConverter;
  * 自定义 hibernate 的枚举值转换,枚举需要实现 {@link PersistableEnum} 接口,并需要继承该 converter
  * 类<br/> <strong>示例:</strong>
  * <pre>
- * {@code
  * public enum Type implements PersistableEnum<Integer> {
  *     MALE(1),
  *     FEMALE(2);
@@ -45,11 +44,10 @@ import javax.persistence.AttributeConverter;
  *     }
  * }
  *
- * @Entity
+ * &#64;Entity
  * public class ExampleEntity {
- *     @Convert(converter = Type.Converter.class)
+ *     &#64;Convert(converter = Type.Converter.class)
  *     private Type type;
- * }
  * }
  * </pre>
  *
