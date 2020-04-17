@@ -24,21 +24,21 @@ import java.lang.annotation.Target;
 /**
  * 权限注解
  *
- * @author chenzhenjia
- * @since 2019/11/21
  * <pre>
  * &#64;RestController
- * &#64;Permission(tag = "添加管理员", value = {"admin:user"})
+ * &#64;Permission(tag = "添加管理员", value = "admin:user")
  * &#64;RequestMapping("user")
  * public class UserCtrl {
  *
  *  &#64;PostMapping
- *  &#64;Permission(tag = "添加管理员", value = {"admin:user:post"})
+ *  &#64;Permission(tag = "添加管理员", value = "admin:user:post")
  *  public Response<?> add(@RequestBody @Validated AdminUserIn addIn) {
  *      return Response.ok();
  *  }
  * }
  * </pre>
+ * @author chenzhenjia
+ * @since 2019/11/21
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE, ElementType.TYPE})
