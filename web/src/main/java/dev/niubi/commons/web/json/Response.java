@@ -118,7 +118,7 @@ public class Response<T> {
         return this;
     }
 
-    public Response<T> putAllExtra(Map<String, Object> extra) {
+    public Response<T> putAllExtra(Map<String, ?> extra) {
         if (this.extra == null) {
             this.extra = new HashMap<>();
         }

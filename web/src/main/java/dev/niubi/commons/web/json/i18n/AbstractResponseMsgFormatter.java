@@ -25,6 +25,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
  */
 public abstract class AbstractResponseMsgFormatter implements ResponseMessageCodeFormatter {
     private final MessageSource messageSource;
+    public static final String NOT_FOUND_MESSAGE = "AbstractResponseMsgFormatter.NotFound";
 
     protected AbstractResponseMsgFormatter(MessageSource messageSource) {
         this.messageSource = messageSource;
@@ -32,14 +33,13 @@ public abstract class AbstractResponseMsgFormatter implements ResponseMessageCod
 
     @Override
     public String getMsg(String msg) {
-        if (support(msg)) {
-            String code = getCode(msg);
-            return messageSource.getMessage(code, new Object[]{}, null, LocaleContextHolder.getLocale());
+        String code = getCode(msg);
+        String message = messageSource.getMessage(code, new Object[]{}, NOT_FOUND_MESSAGE, LocaleContextHolder.getLocale());
+        if(NOT_FOUND_MESSAGE.equals(message)){
+            return msg;
         }
-        return msg;
+        return message;
     }
-
-    protected abstract boolean support(String msg);
 
     protected abstract String getCode(String msg);
 }

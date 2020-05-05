@@ -25,10 +25,10 @@ import org.springframework.context.MessageSource;
 public class DefaultMessageCodeFormatter extends AbstractResponseMsgFormatter {
 
     public static final DefaultMsg DEFAULT_MSG = DefaultMsg.builder()
-      .deleteFailure("{Response.deleteFailure}")
-      .notFound("{Response.notfound}")
-      .ok("{Response.success}")
-      .unknown("{Response.unknown}")
+      .deleteFailure("Response.deleteFailure")
+      .notFound("Response.notfound")
+      .ok("Response.success")
+      .unknown("Response.unknown")
       .build();
 
     public DefaultMessageCodeFormatter(MessageSource messageSource) {
@@ -38,11 +38,6 @@ public class DefaultMessageCodeFormatter extends AbstractResponseMsgFormatter {
     @Override
     public DefaultMsg defaultMsg() {
         return DEFAULT_MSG;
-    }
-
-    @Override
-    protected boolean support(String msg) {
-        return msg.startsWith("{") && msg.endsWith("}");
     }
 
     @Override
