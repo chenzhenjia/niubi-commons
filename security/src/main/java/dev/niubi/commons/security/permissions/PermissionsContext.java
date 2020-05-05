@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package dev.niubi.commons.security.permission;
+package dev.niubi.commons.security.permissions;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import java.util.Set;
 
 /**
+ * 权限的上下文接口，接口只包含了权限数组，且只提供了一个默认的实现，如需要额外的功能需要自定义实现
+ *
  * @author chenzhenjia
- * @since 2019/11/21
+ * @since 2020/4/22
  */
-@Data
-@AllArgsConstructor
-public class PermissionModel {
-    private String permission;
-    private String tag;
+public interface PermissionsContext {
+
+    Set<String> getPermissions();
+
+    void setPermissions(Set<String> permissions);
+
 }

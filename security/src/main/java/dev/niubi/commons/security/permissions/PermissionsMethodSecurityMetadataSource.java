@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.niubi.commons.security.permission;
+package dev.niubi.commons.security.permissions;
 
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.security.access.ConfigAttribute;
@@ -32,7 +32,7 @@ import lombok.val;
  * @author chenzhenjia
  * @since 2019/11/21
  */
-public class PermissionMethodSecurityMetadataSource extends AbstractFallbackMethodSecurityMetadataSource {
+public class PermissionsMethodSecurityMetadataSource extends AbstractFallbackMethodSecurityMetadataSource {
     @Override
     protected Collection<ConfigAttribute> findAttributes(Method method, Class<?> targetClass) {
         return processAnnotations(BridgeMethodResolver.findBridgedMethod(method).getAnnotations());
@@ -56,9 +56,8 @@ public class PermissionMethodSecurityMetadataSource extends AbstractFallbackMeth
             if (annotation instanceof Permission) {
                 val attributes = new ArrayList<ConfigAttribute>();
                 Permission permission = (Permission) annotation;
-                for (String value : permission.value()) {
-                    attributes.add(new PermissionAttribute(value));
-                }
+                String value = permission.value();
+                attributes.add(new PermissionAttribute(value, permission.tag()));
                 return attributes;
             }
         }

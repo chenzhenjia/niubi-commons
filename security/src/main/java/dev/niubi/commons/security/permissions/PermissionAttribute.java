@@ -14,14 +14,29 @@
  * limitations under the License.
  */
 
-package dev.niubi.commons.security.permission;
+package dev.niubi.commons.security.permissions;
 
-import org.springframework.context.annotation.Import;
+import org.springframework.security.access.ConfigAttribute;
 
 /**
  * @author chenzhenjia
- * @since 2020/3/9
+ * @since 2019/11/21
  */
-@Import(PermissionRequestContainer.class)
-public class PermissionAutoConfiguration {
+public class PermissionAttribute implements ConfigAttribute {
+    private final String permission;
+    private final String tag;
+
+    public PermissionAttribute(String permission, String tag) {
+        this.permission = permission;
+        this.tag = tag;
+    }
+
+    @Override
+    public String getAttribute() {
+        return permission;
+    }
+
+    public String getTag() {
+        return tag;
+    }
 }

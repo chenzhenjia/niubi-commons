@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  dev.niubi.commons.security.permission.PermissionAutoConfiguration
+  dev.niubi.commons.security.permissions.PermissionRequestContainer

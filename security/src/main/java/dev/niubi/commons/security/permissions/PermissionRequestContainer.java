@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.niubi.commons.security.permission;
+package dev.niubi.commons.security.permissions;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -40,7 +40,7 @@ import java.util.stream.Stream;
  */
 public class PermissionRequestContainer implements BeanFactoryAware {
     private RequestMappingHandlerMapping requestMappingHandlerMapping;
-    private List<PermissionModel> _permissions = Collections.emptyList();
+    private List<PermissionAttribute> _permissions = Collections.emptyList();
     private volatile int requestMappingSize = -1;
 
     @Override
@@ -51,7 +51,7 @@ public class PermissionRequestContainer implements BeanFactoryAware {
     /**
      * 获取所有权限的集合
      */
-    public List<PermissionModel> getPermissions() {
+    public List<PermissionAttribute> getPermissions() {
         Set<Map.Entry<RequestMappingInfo, HandlerMethod>> entries = requestMappingHandlerMapping.getHandlerMethods()
           .entrySet();
         if (entries.size() != requestMappingSize) {
@@ -60,8 +60,8 @@ public class PermissionRequestContainer implements BeanFactoryAware {
               .flatMap(it -> {
                   HandlerMethod value = it.getValue();
                   Class<?> clazz = value.getMethod().getDeclaringClass();
-                  List<PermissionModel> methodPermission = getMethodPermission(value);
-                  List<PermissionModel> classPermission = getClassPermission(clazz);
+                  List<PermissionAttribute> methodPermission = getMethodPermission(value);
+                  List<PermissionAttribute> classPermission = getClassPermission(clazz);
                   return Stream.concat(methodPermission.stream(), classPermission.stream());
               })
               .collect(Collectors.toList());
@@ -70,16 +70,15 @@ public class PermissionRequestContainer implements BeanFactoryAware {
         return _permissions;
     }
 
-    private List<PermissionModel> getMethodPermission(HandlerMethod method) {
+    private List<PermissionAttribute> getMethodPermission(HandlerMethod method) {
         return Stream.of(method.getMethod().getAnnotations())
           .filter(Permission.class::isInstance)
           .map(Permission.class::cast)
-          .flatMap(permission -> Stream.of(permission.value())
-            .map(s -> new PermissionModel(s, permission.tag())))
+          .map(permission -> new PermissionAttribute(permission.value(), permission.tag()))
           .collect(Collectors.toList());
     }
 
-    private List<PermissionModel> getClassPermission(Class<?> clazz) {
+    private List<PermissionAttribute> getClassPermission(Class<?> clazz) {
         RequestMapping requestMapping = clazz.getAnnotation(RequestMapping.class);
         if (Objects.isNull(requestMapping)) {
             return Collections.emptyList();
@@ -88,7 +87,7 @@ public class PermissionRequestContainer implements BeanFactoryAware {
           .filter(Permission.class::isInstance)
           .map(Permission.class::cast)
           .flatMap(permission -> Stream.of(permission.value())
-            .map(s -> new PermissionModel(s, permission.tag())))
+            .map(s -> new PermissionAttribute(s, permission.tag())))
           .collect(Collectors.toList());
     }
 

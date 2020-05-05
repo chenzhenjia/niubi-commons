@@ -14,24 +14,35 @@
  * limitations under the License.
  */
 
-package dev.niubi.commons.security.permission;
+package dev.niubi.commons.security.permissions;
 
-import org.springframework.security.access.ConfigAttribute;
+import java.util.Collections;
+import java.util.Set;
 
 /**
+ * 权限上下文的默认实现类
+ *
  * @author chenzhenjia
- * @since 2019/11/21
+ * @since 2020/4/23
  */
+public class PermissionsContextImpl implements PermissionsContext {
+    private Set<String> permissions;
 
-public class PermissionAttribute implements ConfigAttribute {
-    private final String permission;
+    public PermissionsContextImpl() {
+        this.permissions = Collections.emptySet();
+    }
 
-    public PermissionAttribute(String permission) {
-        this.permission = permission;
+    public PermissionsContextImpl(Set<String> permissions) {
+        this.permissions = permissions;
     }
 
     @Override
-    public String getAttribute() {
-        return permission;
+    public Set<String> getPermissions() {
+        return permissions;
+    }
+
+    @Override
+    public void setPermissions(Set<String> permissions) {
+        this.permissions = permissions;
     }
 }

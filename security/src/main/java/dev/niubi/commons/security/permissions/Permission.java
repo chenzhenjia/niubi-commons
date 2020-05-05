@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.niubi.commons.security.permission;
+package dev.niubi.commons.security.permissions;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -46,7 +46,7 @@ public @interface Permission {
     /**
      * 权限的 key
      */
-    String[] value();
+    String value();
 
     /**
      * 权限的 tag 名字

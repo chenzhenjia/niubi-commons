@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package dev.niubi.commons.security.permission;
+package dev.niubi.commons.security.permissions;
 
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.expression.method.ExpressionBasedPreInvocationAdvice;
 import org.springframework.security.access.method.MethodSecurityMetadataSource;
@@ -28,32 +30,34 @@ import org.springframework.security.config.annotation.method.configuration.Globa
 import java.util.Arrays;
 
 /**
- * @author chenzhenjia
- * @since 2019/11/21
  * <pre>
  * &#64;EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
  * &#64;Configuration
- * public class GlobalMethodConfiguration extends PermissionMethodSecurityConfiguration {
- *     private PermissionService permissionService;
+ * &#64;EnablePermissions
+ * public class GlobalMethodConfiguration {
  *
- *     &#64;Resource
- *     public void setPermissionService(PermissionService permissionService) {
- *         this.permissionService = permissionService;
- *     }
- *
- *     &#64;Override
- *     protected PermissionVoter permissionVoter() {
- *         return new PermissionVoter(permissionService);
- *     }
- *
+ *      &#64;Bean
+ *      public UsernamePermissionsVoter usernamePermissionsVoter(){
+ *          return new UsernamePermissionsVoter();
+ *      }
  * }
  * </pre>
+ *
+ * @author chenzhenjia
+ * @since 2019/11/21
  */
-public abstract class PermissionMethodSecurityConfiguration extends GlobalMethodSecurityConfiguration {
+public class PermissionsMethodSecurityConfiguration extends GlobalMethodSecurityConfiguration {
+
+    private AbstractPermissionsVoter permissionVoter;
+
+    @Autowired
+    public void setPermissionVoter(ObjectProvider<AbstractPermissionsVoter> permissionVoter) {
+        this.permissionVoter = permissionVoter.getIfAvailable(DefaultPermissionsVoter::new);
+    }
 
     @Override
     protected MethodSecurityMetadataSource customMethodSecurityMetadataSource() {
-        return new PermissionMethodSecurityMetadataSource();
+        return new PermissionsMethodSecurityMetadataSource();
     }
 
     @Override
@@ -62,9 +66,7 @@ public abstract class PermissionMethodSecurityConfiguration extends GlobalMethod
         expressionAdvice.setExpressionHandler(getExpressionHandler());
         PreInvocationAuthorizationAdviceVoter adviceVoter = new PreInvocationAuthorizationAdviceVoter(expressionAdvice);
 
-        return new AffirmativeBased(Arrays.asList(adviceVoter, new RoleVoter(), new AuthenticatedVoter(), permissionVoter()));
+        return new AffirmativeBased(Arrays.asList(adviceVoter, new RoleVoter(), new AuthenticatedVoter(), permissionVoter));
     }
-
-    protected abstract PermissionVoter permissionVoter();
 
 }
