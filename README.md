@@ -81,41 +81,29 @@ compile group: 'dev.niubi.commons', name: 'core', version: 'last-version'
 ```
 * gradle
 ```groovy
-compile group: 'dev.niubi.commons', name: 'security', version: 'last-version'
+implementation('dev.niubi.commons:security:last-version')
+```
+* kotlin dsl
+```kotlin
+implementation("dev.niubi.commons:security:last-version")
 ```
 ### 使用
-* permission
-1. 实现 PermissionService 
-在 loadByUsername 中查询数据库根据用户名获取当前用户的权限,建议做缓存处理
+* permissions
+1. 配置 SpringSecurity 的 GlobalMethodSecurity
 ```java
-@Component
-public class CachePermissionService implements PermissionService {
-    @Override
-    @Transactional(readOnly = true)
-    @Cacheable(value = "permission", key = "#username")
-    public Set<String> loadByUsername(String username) {
-        // TODO query database load user permission
-        return Collections.emptySet();
-    }
-}
-```
-2. 配置 SpringSecurity 的 GlobalMethodSecurity
-```java
-import dev.niubi.commons.security.permission.PermissionMethodSecurityConfiguration;
+import dev.niubi.commons.security.permissions.EnablePermissions;
+import dev.niubi.commons.security.permissions.UsernamePermissionsVoter;
 
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @Configuration
-public class GlobalMethodConfiguration extends PermissionMethodSecurityConfiguration {
-    private PermissionService permissionService;
-
-    @Resource
-    public void setPermissionService(PermissionService permissionService) {
-        this.permissionService = permissionService;
-    }
-
-    @Override
-    protected PermissionVoter permissionVoter() {
-        return new PermissionVoter(permissionService);
+@EnablePermissions
+public class GlobalMethodConfiguration{
+    @Bean
+    public UsernamePermissionsVoter usernamePermissionsVoter(){
+        // 自定义根据用户名加载权限的加载器，建议缓存权限
+        return new UsernamePermissionsVoter(username -> {
+            return new PermissionsContextImpl(Collections.emptySet());
+        });
     }
 
 }
