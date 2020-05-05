@@ -29,7 +29,7 @@ import lombok.Data;
  * @author chenzhenjia
  * @since 2019/11/21
  */
-@ConfigurationProperties(prefix = "dev.niubi.cache")
+@ConfigurationProperties(prefix = "niubi.cache")
 @Data
 public class CacheProperties {
     /**
