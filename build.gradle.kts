@@ -15,10 +15,7 @@
  */
 
 plugins {
-    `maven-publish`
-    signing
-    java
-    `java-library`
+    base
     id("org.jetbrains.kotlin.jvm") version "1.3.70" apply false
     id("org.springframework.boot") version "2.2.6.RELEASE" apply false
     id("io.spring.dependency-management") version "1.0.9.RELEASE" apply false
@@ -56,12 +53,17 @@ subprojects {
         targetCompatibility = JavaVersion.VERSION_1_8
 
     }
-    java {
+    configure<JavaPluginExtension> {
         registerFeature("optional") {
+            val sourceSets: SourceSetContainer by project
             usingSourceSet(sourceSets["main"])
         }
     }
     dependencies {
+        val annotationProcessor by configurations
+        val compileOnly by configurations
+        val testImplementation by configurations
+
         "optionalImplementation"("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
         "optionalImplementation"("org.jetbrains.kotlin:kotlin-stdlib")
         "optionalImplementation"("org.jetbrains.kotlin:kotlin-reflect")
@@ -75,26 +77,27 @@ subprojects {
         testImplementation("org.springframework.boot:spring-boot-starter-test")
     }
     tasks {
-        withType<Javadoc>().configureEach {
+        withType(Javadoc::class).configureEach {
             (options as CoreJavadocOptions).addStringOption("Xdoclint:none", "-quiet")
         }
-        withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class) {
             kotlinOptions {
                 jvmTarget = "1.8"
                 freeCompilerArgs = listOf("-Xjsr305=strict", "-Xjvm-default=enable")
             }
         }
-        withType<JavaCompile> {
-            dependsOn(processResources)
-            options.isIncremental = true
-            options.encoding = "UTF-8"
-            options.compilerArgs.add("-Xlint:unchecked")
-            options.compilerArgs.add("-Xlint:deprecation")
-        }
-        withType<Javadoc> {
+        withType(Javadoc::class) {
             isFailOnError = false
             options.encoding = "UTF-8"
         }
+    }
+    tasks.withType(JavaCompile::class) {
+        val processResources by tasks
+        dependsOn(processResources)
+        options.isIncremental = true
+        options.encoding = "UTF-8"
+        options.compilerArgs.add("-Xlint:unchecked")
+        options.compilerArgs.add("-Xlint:deprecation")
     }
     val jar: Jar by tasks
     val bootJar: org.springframework.boot.gradle.tasks.bundling.BootJar by tasks
@@ -111,6 +114,7 @@ subprojects {
 //    }
 
     tasks.register<Jar>("sourcesJar") {
+        val sourceSets: SourceSetContainer by project
         from(sourceSets["main"].allSource)
         archiveClassifier.set("sources")
     }
@@ -120,7 +124,7 @@ subprojects {
         archiveClassifier.set("javadoc")
     }
 
-    publishing {
+    configure<PublishingExtension> {
         publications {
             create<MavenPublication>("mavenJava") {
                 pom {
@@ -147,8 +151,10 @@ subprojects {
                     }
                 }
                 from(components["java"])
-                artifact(tasks["sourcesJar"])
-                artifact(tasks["javadocJar"])
+                val sourcesJar by tasks
+                val javadocJar by tasks
+                artifact(sourcesJar)
+                artifact(javadocJar)
             }
         }
         repositories {
@@ -165,13 +171,14 @@ subprojects {
             }
         }
     }
-    signing {
+    configure<SigningExtension> {
         if (project.hasProperty("isCI")) {
             val signingKeyId: String? by project
             val signingPassword: String? by project
             val signingKey: String? by project
             useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
         }
+        val publishing: PublishingExtension by project
         sign(publishing.publications["mavenJava"])
     }
 }
