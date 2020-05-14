@@ -25,6 +25,7 @@ import org.springframework.security.access.prepost.PreInvocationAuthorizationAdv
 import org.springframework.security.access.vote.AffirmativeBased;
 import org.springframework.security.access.vote.AuthenticatedVoter;
 import org.springframework.security.access.vote.RoleVoter;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 
 import java.util.Arrays;
@@ -46,6 +47,7 @@ import java.util.Arrays;
  * @author chenzhenjia
  * @since 2019/11/21
  */
+@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class PermissionsMethodSecurityConfiguration extends GlobalMethodSecurityConfiguration {
 
     private AbstractPermissionsVoter permissionVoter;

@@ -20,9 +20,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
@@ -45,10 +43,10 @@ import java.lang.annotation.Target;
  * @author chenzhenjia
  * @since 2020/4/23
  */
-@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
-@Retention(value = RetentionPolicy.RUNTIME)
+@Retention(value = java.lang.annotation.RetentionPolicy.RUNTIME)
+@Target(value = { java.lang.annotation.ElementType.TYPE })
 @Documented
 @Import({PermissionsMethodSecurityConfiguration.class})
-@Configuration(proxyBeanMethods = false)
+@Configuration
 public @interface EnablePermissions {
 }

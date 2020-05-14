@@ -39,20 +39,21 @@ import java.util.stream.Stream;
  * @since 2019/11/21
  */
 public class PermissionRequestContainer implements BeanFactoryAware {
-    private RequestMappingHandlerMapping requestMappingHandlerMapping;
     private List<PermissionAttribute> _permissions = Collections.emptyList();
     private volatile int requestMappingSize = -1;
+    private BeanFactory beanFactory;
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        this.requestMappingHandlerMapping = beanFactory.getBean(RequestMappingHandlerMapping.class);
+        this.beanFactory = beanFactory;
     }
 
     /**
      * 获取所有权限的集合
      */
     public List<PermissionAttribute> getPermissions() {
-        Set<Map.Entry<RequestMappingInfo, HandlerMethod>> entries = requestMappingHandlerMapping.getHandlerMethods()
+        RequestMappingHandlerMapping handlerMapping = beanFactory.getBean(RequestMappingHandlerMapping.class);
+        Set<Map.Entry<RequestMappingInfo, HandlerMethod>> entries = handlerMapping.getHandlerMethods()
           .entrySet();
         if (entries.size() != requestMappingSize) {
             _permissions = entries
