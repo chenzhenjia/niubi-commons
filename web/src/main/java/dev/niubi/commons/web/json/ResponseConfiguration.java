@@ -17,6 +17,7 @@
 package dev.niubi.commons.web.json;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
@@ -25,6 +26,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 import dev.niubi.commons.web.json.i18n.DefaultMessageCodeFormatter;
 import dev.niubi.commons.web.json.i18n.DefaultMsg;
@@ -35,6 +37,7 @@ import dev.niubi.commons.web.json.i18n.ResponseMessageCodeFormatter;
  * @since 2020/3/25
  */
 @Configuration
+@ConditionalOnClass(ResponseBodyAdvice.class)
 public class ResponseConfiguration {
 
     @Bean
