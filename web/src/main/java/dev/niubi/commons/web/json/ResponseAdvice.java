@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 import java.lang.reflect.Method;
-import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -59,7 +58,7 @@ public class ResponseAdvice implements ResponseBodyAdvice<Object> {
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
         if (Objects.nonNull(body) && body instanceof Response) {
             Response<?> responseBody = (Response<?>) body;
-            responseBody.setTimestamp(new Date());
+            responseBody.setTimestamp(System.currentTimeMillis());
             // 国际化处理
             String msg = responseBody.getMsg();
             if (!StringUtils.isEmpty(msg)) {

@@ -90,30 +90,29 @@ public class ExceptionsHandler {
               return o.toString();
           })
           .orElse(null);
-        Response<Object> response = Response.business(BAD_REQUEST.value(), msg);
-        response.putAllExtra(map);
-        return response;
+        return Response.business(msg).code(BAD_REQUEST.value())
+          .extra(map).build();
     }
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<Response<?>> handleBusinessException(BusinessException ex) {
         log.debug("处理业务异常", ex);
-        Response<Object> response = Response.business(ex.getCode(), ex.getMessage());
+        Response<Object> response = Response.business(ex.getMessage()).code(ex.getCode()).build();
         return ResponseEntity.ok().body(response);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<Response<?>> handleMissingServletRequestParameterException(MissingServletRequestParameterException ex) {
-        Response<Object> response = Response.business(BAD_REQUEST.value(), "ExceptionsHandler.MissingServletRequestParameterException");
-        response.putExtra("exception", ex.getMessage());
+        Response<Object> response = Response.business("ExceptionsHandler.MissingServletRequestParameterException").code(BAD_REQUEST.value())
+          .extra("exception", ex.getMessage()).build();
 
         return ResponseEntity.badRequest().body(response);
     }
 
     @ExceptionHandler({HttpMessageNotReadableException.class, IllegalArgumentException.class})
     public ResponseEntity<Response<?>> handleHttpMessageNotReadableException(RuntimeException ex) {
-        Response<Object> response = Response.business(BAD_REQUEST.value(), "ExceptionsHandler.HttpMessageNotReadable");
-        response.putExtra("exception", ex.getMessage());
+        Response<Object> response = Response.business("ExceptionsHandler.HttpMessageNotReadable")
+          .code(BAD_REQUEST.value()).extra("exception", ex.getMessage()).build();
 
         return ResponseEntity.badRequest().body(response);
     }
@@ -133,20 +132,18 @@ public class ExceptionsHandler {
             Map<String, String> errorMap = violations.stream()
               .collect(Collectors.toMap(v -> v.getPropertyPath().toString(), ConstraintViolation::getMessage));
             String msg = errorMap.values().stream().findFirst().orElse(null);
-            response = Response.business(BAD_REQUEST.value(), msg);
-            response.putAllExtra(errorMap);
+            response = Response.business(msg).code(BAD_REQUEST.value()).extra(errorMap).build();
             return ResponseEntity.badRequest().body(response);
         } else {
-            response = Response.business(BAD_REQUEST.value(), "");
-            response.putExtra("exception", ex.getMessage());
+            response = Response.business("ExceptionsHandler.ValidationException").code(BAD_REQUEST.value())
+              .extra("exception", ex.getMessage()).build();
         }
         return ResponseEntity.badRequest().body(response);
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<Response<?>> noHandlerFoundException(NoHandlerFoundException ex) {
-        Response<Object> response = Response.notfound();
-        response.putExtra("exception", ex.getMessage());
+        Response<Object> response = Response.notfound().extra("exception", ex.getMessage()).build();
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 }

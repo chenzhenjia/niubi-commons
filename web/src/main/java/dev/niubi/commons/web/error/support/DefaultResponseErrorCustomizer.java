@@ -37,9 +37,9 @@ public class DefaultResponseErrorCustomizer implements ResponseErrorCustomizer {
         String error = MapUtils.getString(errorAttributes, "error");
         String message = MapUtils.getString(errorAttributes, "message");
         String path = MapUtils.getString(errorAttributes, "path");
-        HashMap<String, Object> map = Response.business(statusCode, message).toMap();
+        HashMap<String, Object> map = Response.business(error).code(statusCode).build().toMap();
         map.put("path", path);
-        map.put("error", error);
+        map.put("error", message);
         return map;
     }
 }

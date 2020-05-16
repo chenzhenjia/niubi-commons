@@ -36,7 +36,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 public class KotlinExceptionHandler {
     @ExceptionHandler(MissingKotlinParameterException.class)
     public ResponseEntity<Response<?>> handleMissingKotlinParameter(MissingKotlinParameterException e) {
-        Response<Object> response = Response.business(BAD_REQUEST.value(), e.getMsg());
+        Response<Object> response = Response.business(e.getMsg()).code(BAD_REQUEST.value()).msg(e.getMsg()).build();
         return ResponseEntity.badRequest().body(response);
     }
 }
