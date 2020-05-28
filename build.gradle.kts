@@ -21,16 +21,6 @@ plugins {
     id("io.spring.dependency-management") version "1.0.9.RELEASE" apply false
 }
 
-allprojects {
-    apply(plugin = "idea")
-    configure<org.gradle.plugins.ide.idea.model.IdeaModel> {
-        module {
-            outputDir = file("build/classes/main")
-            testOutputDir = file("build/classes/test")
-        }
-    }
-}
-
 subprojects {
     repositories {
         jcenter()
