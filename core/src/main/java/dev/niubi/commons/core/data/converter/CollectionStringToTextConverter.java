@@ -18,17 +18,18 @@ package dev.niubi.commons.core.data.converter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Type;
-import java.util.List;
+import java.util.Collection;
 import java.util.Objects;
 
 import javax.persistence.AttributeConverter;
 
 import lombok.extern.slf4j.Slf4j;
+
+import static dev.niubi.commons.core.data.converter.ObjectMapperInstance.OBJECT_MAPPER;
 
 
 /**
@@ -36,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
  * <pre>
  * &#64;Entity
  * public class ExampleEntity {
- *     &#64;Convert(converter = ListStringToTextConverter.class)
+ *     &#64;Convert(converter = CollectionStringToTextConverter.class)
  *     private Type type;
  * }
  * </pre>
@@ -45,11 +46,9 @@ import lombok.extern.slf4j.Slf4j;
  * @since 2019/11/23
  */
 @Slf4j
-public class ListStringToTextConverter implements AttributeConverter<List<String>, String>, Serializable {
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
+public class CollectionStringToTextConverter implements AttributeConverter<Collection<String>, String>, Serializable {
     @Override
-    public String convertToDatabaseColumn(List<String> attribute) {
+    public String convertToDatabaseColumn(Collection<String> attribute) {
         if (Objects.isNull(attribute)) return null;
         try {
             return OBJECT_MAPPER.writeValueAsString(attribute);
@@ -60,10 +59,10 @@ public class ListStringToTextConverter implements AttributeConverter<List<String
     }
 
     @Override
-    public List<String> convertToEntityAttribute(String dbData) {
+    public Collection<String> convertToEntityAttribute(String dbData) {
         if (Objects.isNull(dbData)) return null;
         try {
-            return OBJECT_MAPPER.readValue(dbData, new TypeReference<List<String>>() {
+            return OBJECT_MAPPER.readValue(dbData, new TypeReference<Collection<String>>() {
                 @Override
                 public Type getType() {
                     return super.getType();
