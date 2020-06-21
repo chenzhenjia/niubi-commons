@@ -21,53 +21,6 @@
 compile group: 'dev.niubi.commons', name: 'core', version: 'last-version'
 ```
 ### 使用
-* jpa converter
-    1. `ListStringToBlobConverter` 把 list 字符串转为数据库的 Blob 类型的值
-        ```java
-        import dev.niubi.commons.core.data.converter.ListStringToBlobConverter;
-        @Entity
-        public class ExampleEntity {
-             @Convert(converter = ListStringToBlobConverter.class)
-             private List<String> type;
-        }
-        ``` 
-    2. `ListStringToTextConverter` 把 list 字符串转为数据库的 varchar 类型的值
-        ```java
-        import dev.niubi.commons.core.data.converter.ListStringToTextConverter;
-        @Entity
-        public class ExampleEntity {
-            @Convert(converter = ListStringToTextConverter.class)
-            private List<String> type;
-        }
-        ``` 
-    3. `PersistableEnumConverter` 把需要自定义枚举值转为数据库的值,插入到数据库中.
-        ```java
-        import dev.niubi.commons.core.data.converter.PersistableEnumConverter;
-        
-        public enum Type implements PersistableEnum<Integer> {
-          MALE(1),
-          FEMALE(2);
-          private final Integer value;
-        
-          MenuType(int value) {
-              this.value = value;
-          }
-        
-          public Integer getValue() {
-              return value;
-          }
-        
-          public static class Converter extends PersistableEnumConverter<Type, Integer> {
-        
-          }
-        }
-        
-        @Entity
-        public class ExampleEntity {
-          @Convert(converter = Type.Converter.class)
-          private Type type;
-        }
-        ```
 ## security
 ### 在项目中引用
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/dev.niubi.commons/security/badge.svg)](https://maven-badges.herokuapp.com/maven-central/dev.niubi.commons/security)
@@ -108,7 +61,7 @@ public class GlobalMethodConfiguration{
 
 }
 ```
-3. 使用
+2. 使用
 直接在 controller 类上或者 方法上
 ```java
 @RestController
