@@ -17,6 +17,7 @@
 package dev.niubi.commons.web.error.support;
 
 import org.apache.commons.collections.MapUtils;
+import org.springframework.http.HttpStatus;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +38,8 @@ public class DefaultResponseErrorCustomizer implements ResponseErrorCustomizer {
         String error = MapUtils.getString(errorAttributes, "error");
         String message = MapUtils.getString(errorAttributes, "message");
         String path = MapUtils.getString(errorAttributes, "path");
-        HashMap<String, Object> map = Response.business(error).code(statusCode).build().toMap();
+        HashMap<String, Object> map = Response.business(error)
+          .status(HttpStatus.valueOf(statusCode)).build().toMap();
         map.put("path", path);
         map.put("error", message);
         return map;

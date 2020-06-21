@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import dev.niubi.commons.web.error.support.DefaultResponseErrorCustomizer;
-import dev.niubi.commons.web.json.i18n.ResponseMessageCodeFormatter;
 
 /**
  * @author chenzhenjia
@@ -84,8 +83,8 @@ public class ResponseErrorConfiguration {
     }
 
     @Bean
-    public ExceptionsHandler exceptionsHandler(ResponseMessageCodeFormatter responseMessageCodeFormatter) {
-        return new ExceptionsHandler(responseMessageCodeFormatter);
+    public ExceptionsHandler exceptionsHandler() {
+        return new ExceptionsHandler();
     }
 
     @Configuration

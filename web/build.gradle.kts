@@ -17,6 +17,7 @@
 //apply(from = "../gradle/publish.gradle.kts")
 dependencies {
     api("commons-collections:commons-collections:${properties["commonsCollectionsVersion"]}")
+    api("org.springframework.boot:spring-boot-starter-validation")
 
     optionalImplementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     optionalImplementation("com.fasterxml.jackson.datatype:jackson-datatype-hibernate5")

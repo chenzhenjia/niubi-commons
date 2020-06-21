@@ -42,7 +42,6 @@ import javax.validation.ValidationException;
 
 import dev.niubi.commons.web.error.exception.BusinessException;
 import dev.niubi.commons.web.json.Response;
-import dev.niubi.commons.web.json.i18n.ResponseMessageCodeFormatter;
 import lombok.extern.slf4j.Slf4j;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -54,11 +53,6 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @ControllerAdvice
 @Slf4j
 public class ExceptionsHandler {
-    private final ResponseMessageCodeFormatter responseMessageCodeFormatter;
-
-    public ExceptionsHandler(ResponseMessageCodeFormatter responseMessageCodeFormatter) {
-        this.responseMessageCodeFormatter = responseMessageCodeFormatter;
-    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleBindingErrors(MethodArgumentNotValidException ex) {
@@ -90,20 +84,25 @@ public class ExceptionsHandler {
               return o.toString();
           })
           .orElse(null);
-        return Response.business(msg).code(BAD_REQUEST.value())
+        return Response.business(msg).status(BAD_REQUEST)
           .extra(map).build();
     }
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<Response<?>> handleBusinessException(BusinessException ex) {
         log.debug("处理业务异常", ex);
-        Response<Object> response = Response.business(ex.getMessage()).code(ex.getCode()).build();
-        return ResponseEntity.ok().body(response);
+        Response<Object> response = Response.business(ex.getCode()).msg(ex.getMessage()).build();
+        HttpStatus status = ex.getStatus();
+        if (Objects.isNull(status)) {
+            status = HttpStatus.OK;
+        }
+        return ResponseEntity.status(status).body(response);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<Response<?>> handleMissingServletRequestParameterException(MissingServletRequestParameterException ex) {
-        Response<Object> response = Response.business("ExceptionsHandler.MissingServletRequestParameterException").code(BAD_REQUEST.value())
+        Response<Object> response = Response.business("ExceptionsHandler.MissingServletRequestParameterException")
+          .status(BAD_REQUEST)
           .extra("exception", ex.getMessage()).build();
 
         return ResponseEntity.badRequest().body(response);
@@ -112,7 +111,7 @@ public class ExceptionsHandler {
     @ExceptionHandler({HttpMessageNotReadableException.class, IllegalArgumentException.class})
     public ResponseEntity<Response<?>> handleHttpMessageNotReadableException(RuntimeException ex) {
         Response<Object> response = Response.business("ExceptionsHandler.HttpMessageNotReadable")
-          .code(BAD_REQUEST.value()).extra("exception", ex.getMessage()).build();
+          .status(BAD_REQUEST).extra("exception", ex.getMessage()).build();
 
         return ResponseEntity.badRequest().body(response);
     }
@@ -132,10 +131,10 @@ public class ExceptionsHandler {
             Map<String, String> errorMap = violations.stream()
               .collect(Collectors.toMap(v -> v.getPropertyPath().toString(), ConstraintViolation::getMessage));
             String msg = errorMap.values().stream().findFirst().orElse(null);
-            response = Response.business(msg).code(BAD_REQUEST.value()).extra(errorMap).build();
+            response = Response.business(msg).status(BAD_REQUEST).extra(errorMap).build();
             return ResponseEntity.badRequest().body(response);
         } else {
-            response = Response.business("ExceptionsHandler.ValidationException").code(BAD_REQUEST.value())
+            response = Response.business("ExceptionsHandler.ValidationException").status(BAD_REQUEST)
               .extra("exception", ex.getMessage()).build();
         }
         return ResponseEntity.badRequest().body(response);

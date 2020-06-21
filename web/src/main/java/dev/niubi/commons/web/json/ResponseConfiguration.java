@@ -16,6 +16,8 @@
 
 package dev.niubi.commons.web.json;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -29,7 +31,6 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 import dev.niubi.commons.web.json.i18n.DefaultMessageCodeFormatter;
-import dev.niubi.commons.web.json.i18n.DefaultMsg;
 import dev.niubi.commons.web.json.i18n.ResponseMessageCodeFormatter;
 
 /**
@@ -37,15 +38,13 @@ import dev.niubi.commons.web.json.i18n.ResponseMessageCodeFormatter;
  * @since 2020/3/25
  */
 @Configuration
-@ConditionalOnClass(ResponseBodyAdvice.class)
+@ConditionalOnClass({ResponseBodyAdvice.class, ObjectMapper.class})
 public class ResponseConfiguration {
 
     @Bean
     @Lazy(false)
-    public ResponseAdvice responseAdvice(ObjectProvider<ResponseCustomizer> responseCustomizers,
-                                         ResponseMessageCodeFormatter messageCodeFormatter) {
-
-        return new ResponseAdvice(responseCustomizers.getIfAvailable(() -> response -> response), messageCodeFormatter);
+    public ResponseCustomizeAdvice responseAdvice(ObjectProvider<ResponseCustomizer> responseCustomizers) {
+        return new ResponseCustomizeAdvice(responseCustomizers.getIfAvailable(() -> response -> response));
     }
 
     protected MessageSource messageSource() {
@@ -67,13 +66,11 @@ public class ResponseConfiguration {
     }
 
     @Bean
-    public ApplicationListener<ContextRefreshedEvent> responseContextInitFinishListener(ResponseMessageCodeFormatter messageCodeFormatter) {
+    public ApplicationListener<ContextRefreshedEvent> responseContextInitFinishListener(
+      ResponseMessageCodeFormatter messageCodeFormatter, ObjectMapper objectMapper) {
         return event -> {
-            DefaultMsg defaultMsg = messageCodeFormatter.defaultMsg();
-            Response.Status.DELETE_FAILURE_MSG = defaultMsg.getDeleteFailure();
-            Response.Status.NOT_FOUND_MSG = defaultMsg.getNotFound();
-            Response.Status.SUCCESS_MSG = defaultMsg.getOk();
-            Response.Status.UNKNOWN_MSG = defaultMsg.getUnknown();
+            Response.setMessageCodeFormatter(messageCodeFormatter);
+            Response.setObjectMapper(objectMapper);
         };
     }
 

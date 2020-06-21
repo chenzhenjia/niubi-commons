@@ -16,27 +16,48 @@
 
 package dev.niubi.commons.web.error.exception;
 
+import org.springframework.http.HttpStatus;
+
+import dev.niubi.commons.web.json.Response;
+
 /**
  * @author chenzhenjia
  * @since 2020/1/29
  */
 public class BusinessException extends RuntimeException {
-    private Integer code = 0;
+    private String code = Response.DefaultCode.BUSINESS;
+    private HttpStatus status;
 
     public BusinessException() {
         super("未知错误");
     }
 
-    public BusinessException(String message, Integer code) {
+    public BusinessException(String message, String code) {
+        this(message, code, null);
+    }
+
+    public BusinessException(String message, String code,
+                             HttpStatus status) {
         super(message);
         this.code = code;
+        this.status = status;
+    }
+
+    public BusinessException(String message,
+                             HttpStatus status) {
+        super(message);
+        this.status = status;
     }
 
     public BusinessException(String message) {
         super(message);
     }
 
-    public Integer getCode() {
+    public HttpStatus getStatus() {
+        return status;
+    }
+
+    public String getCode() {
         return code;
     }
 }

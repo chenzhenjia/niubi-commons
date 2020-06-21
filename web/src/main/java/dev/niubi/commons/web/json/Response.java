@@ -17,14 +17,24 @@
 package dev.niubi.commons.web.json;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.jetbrains.annotations.NotNull;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 
+import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletResponse;
+
+import dev.niubi.commons.web.json.i18n.ResponseMessageCodeFormatter;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
@@ -38,12 +48,11 @@ import lombok.Setter;
  */
 @Data
 public class Response<T> {
-    public static class Status {
+    public static class DefaultCode {
         /**
          * 成功
          */
         public static final String SUCCESS = "ok";
-        static String SUCCESS_MSG = "";
         /**
          * 业务异常
          */
@@ -52,23 +61,28 @@ public class Response<T> {
          * 未知异常
          */
         public static final String UNKNOWN = "unknown";
-        static String UNKNOWN_MSG = "";
-
         public static final String NOT_FOUND = "notFound";
-
-        static String NOT_FOUND_MSG = "";
-
         public static final String DELETE_FAILURE = "deleteFailure";
+    }
 
-        static String DELETE_FAILURE_MSG = "";
+    private static ResponseMessageCodeFormatter messageCodeFormatter;
+    private static volatile ObjectMapper objectMapper = new ObjectMapper();
+
+    public static synchronized void setObjectMapper(ObjectMapper newObjectMapper) {
+        Objects.requireNonNull(newObjectMapper, "ObjectMapper 不能为空");
+        objectMapper = newObjectMapper;
+    }
+
+    protected static void setMessageCodeFormatter(ResponseMessageCodeFormatter messageCodeFormatter) {
+        Response.messageCodeFormatter = messageCodeFormatter;
     }
 
     /**
      * 状态码
      */
+    private HttpStatus status;
     @Getter
-    private final String status;
-    private Integer code;
+    private String code;
     /**
      * 消息
      */
@@ -83,16 +97,26 @@ public class Response<T> {
      */
     @Getter
     @Setter(AccessLevel.PACKAGE)
-    private Long timestamp;
+    private Date timestamp;
     /**
      * 返回的额外的数据
      */
     private Map<String, Object> extra;
 
     @JsonCreator
-    public Response(@JsonProperty("status") String status, @JsonProperty("code") Integer code,
+    public Response(@JsonProperty("code") String code,
+                    @JsonProperty("status") Integer status,
                     @JsonProperty("body") T body, @JsonProperty("msg") String msg,
                     @JsonProperty("extra") Map<String, Object> extra) {
+        this.status = Optional.ofNullable(status).map(HttpStatus::valueOf).orElse(null);
+        this.msg = msg;
+        this.body = body;
+        this.code = code;
+        this.extra = extra;
+    }
+
+    public Response(String code, HttpStatus status, T body, String msg,
+                    Map<String, Object> extra) {
         this.status = status;
         this.msg = msg;
         this.body = body;
@@ -100,25 +124,33 @@ public class Response<T> {
         this.extra = extra;
     }
 
+    public int getStatus() {
+        return getHttpStatus().value();
+    }
+
+    @JsonIgnore
+    public HttpStatus getHttpStatus() {
+        return Optional.ofNullable(status).orElse(HttpStatus.OK);
+    }
 
     public boolean isSuccess() {
-        return Status.SUCCESS.equals(status);
+        return DefaultCode.SUCCESS.equals(code);
     }
 
     @NotNull
     public final HashMap<String, Object> toMap() {
         HashMap<String, Object> map = new HashMap<>();
         if (this.msg != null) {
-            map.put("msg", this.msg);
+            map.put("msg", this.getMsg());
         }
         if (this.extra != null) {
             map.put("extra", this.extra);
         }
-        Long timestamp = this.timestamp;
+        Date timestamp = this.timestamp;
         if (timestamp == null) {
-            timestamp = System.currentTimeMillis();
+            timestamp = new Date();
         }
-        map.put("status", this.status);
+        map.put("status", getStatus());
         map.put("code", this.code);
         map.put("body", this.body);
         map.put("timestamp", timestamp);
@@ -126,80 +158,97 @@ public class Response<T> {
         return map;
     }
 
+    public Response<T> writeHeader(HttpServletResponse response) {
+        response.setCharacterEncoding("utf-8");
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setStatus(getStatus());
+        return this;
+    }
+
+    public void write(HttpServletResponse response) throws IOException {
+        objectMapper.writeValue(response.getWriter(), writeHeader(response).toMap());
+    }
+
+    public void writeAndFlash(HttpServletResponse response) throws IOException {
+        write(response);
+        response.flushBuffer();
+    }
+
+    public void write(ObjectMapper objectMapper, HttpServletResponse response) throws IOException {
+        objectMapper.writeValue(response.getWriter(), writeHeader(response).toMap());
+    }
+
+    public void writeAndFlash(ObjectMapper objectMapper, HttpServletResponse response) throws IOException {
+        write(objectMapper, response);
+        response.flushBuffer();
+    }
+
     public static <T> Response<T> ok(T body) {
         return ok().body(body);
     }
 
     public static Builder ok(String msg) {
-        return ok().msg(msg);
-    }
-
-    public static Builder ok(Integer code) {
-        return ok().code(code);
+        return new Builder(DefaultCode.SUCCESS).status(HttpStatus.OK).msg(msg);
     }
 
     public static Builder ok() {
-        return new Builder(Status.SUCCESS).msg(Status.SUCCESS_MSG);
+        return ok(messageCodeFormatter.defaultMsg().getOk());
+    }
+
+    public static Builder business(String msg) {
+        return status(DefaultCode.BUSINESS).msg(msg);
+    }
+
+    public static <T> Response<T> business(String msg, T body) {
+        return business(msg).body(body);
+    }
+
+    public static Builder status(String code) {
+        return new Builder(code);
     }
 
     public static Builder deleteFailure() {
-        return new Builder(Status.DELETE_FAILURE).msg(Status.DELETE_FAILURE_MSG);
+        return deleteFailure(messageCodeFormatter.defaultMsg().getDeleteFailure());
     }
 
     public static Builder deleteFailure(String msg) {
-        return deleteFailure().msg(msg);
-    }
-
-    public static Builder deleteFailure(Integer code) {
-        return deleteFailure().code(code);
+        return new Builder(DefaultCode.DELETE_FAILURE).msg(msg);
     }
 
     public static <T> Response<T> deleteFailure(T body) {
         return deleteFailure().body(body);
     }
 
-    private static Builder business() {
-        return status(Status.BUSINESS);
-    }
-
-    public static Builder business(String msg) {
-        return business().msg(msg);
-    }
-
-    private static Builder status(String status) {
-        return new Builder(status);
-    }
-
     public static <T> Response<T> notfound(T body) {
         return notfound().body(body);
     }
 
-    public static Builder notfound(String msg) {
-        return notfound().msg(msg);
-    }
-
-    public static Builder notfound(Integer code) {
-        return notfound().code(code);
-    }
-
     public static Builder notfound() {
-        return status(Status.NOT_FOUND).msg(Status.NOT_FOUND_MSG);
+        return notfound(messageCodeFormatter.defaultMsg().getNotFound());
+    }
+
+    public static Builder notfound(String msg) {
+        return status(DefaultCode.NOT_FOUND).msg(msg).status(HttpStatus.NOT_FOUND);
+    }
+
+    public static <T> Response<T> unknown(T body) {
+        return unknown().body(body);
     }
 
     public static Builder unknown() {
-        return status(Status.UNKNOWN).msg(Status.UNKNOWN_MSG);
+        return unknown(messageCodeFormatter.defaultMsg().getUnknown());
     }
 
     public static Builder unknown(String msg) {
-        return unknown().msg(msg);
+        return status(DefaultCode.UNKNOWN).msg(msg)
+          .status(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     public static class Builder {
         /**
-         * 状态码
+         * 相应码
          */
-        private final String status;
-        private Integer code;
+        private final String code;
         /**
          * 消息
          */
@@ -208,19 +257,14 @@ public class Response<T> {
          * 返回的额外的数据
          */
         private Map<String, Object> extra;
+        private HttpStatus status;
 
-        public Builder(String status) {
-            this.status = status;
+        public Builder(String code) {
+            this.code = code;
         }
 
         public Builder msg(String msg) {
-            this.msg = msg;
-            return this;
-        }
-
-
-        public Builder code(Integer code) {
-            this.code = code;
+            this.msg = messageCodeFormatter.getMsg(msg);
             return this;
         }
 
@@ -240,12 +284,17 @@ public class Response<T> {
             return this;
         }
 
+        public Builder status(HttpStatus status) {
+            this.status = status;
+            return this;
+        }
+
         public <T> Response<T> build() {
             return body(null);
         }
 
         public <T> Response<T> body(T body) {
-            return new Response<>(Optional.ofNullable(status).orElse(Status.UNKNOWN), Optional.ofNullable(code).orElse(0), body, msg, extra);
+            return new Response<>(Optional.ofNullable(code).orElse(DefaultCode.UNKNOWN), status, body, msg, extra);
         }
     }
 
