@@ -197,14 +197,14 @@ public class Response<T> {
     }
 
     public static Builder business(String msg) {
-        return status(DefaultCode.BUSINESS).msg(msg);
+        return code(DefaultCode.BUSINESS).msg(msg);
     }
 
     public static <T> Response<T> business(String msg, T body) {
         return business(msg).body(body);
     }
 
-    public static Builder status(String code) {
+    public static Builder code(String code) {
         return new Builder(code);
     }
 
@@ -229,7 +229,7 @@ public class Response<T> {
     }
 
     public static Builder notfound(String msg) {
-        return status(DefaultCode.NOT_FOUND).msg(msg).status(HttpStatus.NOT_FOUND);
+        return code(DefaultCode.NOT_FOUND).msg(msg).status(HttpStatus.NOT_FOUND);
     }
 
     public static <T> Response<T> unknown(T body) {
@@ -240,8 +240,12 @@ public class Response<T> {
         return unknown(messageCodeFormatter.defaultMsg().getUnknown());
     }
 
+    public static Builder copy(Response<?> response) {
+        return new Builder(response.code).with(response);
+    }
+
     public static Builder unknown(String msg) {
-        return status(DefaultCode.UNKNOWN).msg(msg)
+        return code(DefaultCode.UNKNOWN).msg(msg)
           .status(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -288,6 +292,13 @@ public class Response<T> {
         public Builder status(HttpStatus status) {
             this.status = status;
             return this;
+        }
+
+        public Builder with(Response<?> response) {
+            return msg(response.msg)
+              .status(response.getHttpStatus())
+              .extra(response.extra)
+              ;
         }
 
         public <T> Response<T> build() {
