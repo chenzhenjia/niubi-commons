@@ -91,7 +91,8 @@ public class ExceptionsHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<Response<?>> handleBusinessException(BusinessException ex) {
         log.debug("处理业务异常", ex);
-        Response<Object> response = Response.business(ex.getCode()).msg(ex.getMessage()).build();
+        Response<Object> response = Response.business(ex.getCode()).msg(ex.getMessage())
+          .status(ex.getStatus()).build();
         HttpStatus status = ex.getStatus();
         if (Objects.isNull(status)) {
             status = HttpStatus.OK;

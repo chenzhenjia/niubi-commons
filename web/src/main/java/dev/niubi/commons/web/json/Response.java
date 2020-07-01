@@ -122,6 +122,7 @@ public class Response<T> {
         this.body = body;
         this.code = code;
         this.extra = extra;
+        this.timestamp = new Date();
     }
 
     public int getStatus() {
