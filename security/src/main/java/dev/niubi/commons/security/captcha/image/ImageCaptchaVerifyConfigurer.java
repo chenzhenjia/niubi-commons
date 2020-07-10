@@ -17,6 +17,7 @@
 package dev.niubi.commons.security.captcha.image;
 
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
+import org.springframework.security.config.annotation.web.configurers.AbstractAuthenticationFilterConfigurer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -25,15 +26,20 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.util.Objects;
 
+import javax.servlet.Filter;
+
 /**
  * 图片验证码验证的SpringSecurity配置
  *
  * @author chenzhenjia
  * @since 2020/6/12
  */
+@SuppressWarnings("rawtypes")
 public class ImageCaptchaVerifyConfigurer<H extends HttpSecurityBuilder<H>>
   extends AbstractHttpConfigurer<ImageCaptchaVerifyConfigurer<H>, H> {
     private final ImageCaptchaVerifyFilter imageCaptchaVerifyFilter = new ImageCaptchaVerifyFilter();
+    private Class<? extends AbstractAuthenticationFilterConfigurer> authenticationFilterConfigurer = FormLoginConfigurer.class;
+    private Class<? extends Filter> beforeFilter = UsernamePasswordAuthenticationFilter.class;
     private String loginProcessingUrl = "/login";
 
     /**
@@ -52,17 +58,28 @@ public class ImageCaptchaVerifyConfigurer<H extends HttpSecurityBuilder<H>>
         return this;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked"})
     @Override
     public void configure(H builder) throws Exception {
-        FormLoginConfigurer<H> configurer = builder.getConfigurer(FormLoginConfigurer.class);
+        AbstractAuthenticationFilterConfigurer configurer = builder.getConfigurer(authenticationFilterConfigurer);
         if (Objects.isNull(configurer)) {
             return;
         }
         configurer.loginProcessingUrl(loginProcessingUrl);
         imageCaptchaVerifyFilter.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher(
           loginProcessingUrl, "POST"));
-        builder.addFilterBefore(imageCaptchaVerifyFilter, UsernamePasswordAuthenticationFilter.class);
+        builder.addFilterBefore(imageCaptchaVerifyFilter, beforeFilter);
+    }
+
+    public ImageCaptchaVerifyConfigurer<H> beforeFilter(Class<? extends Filter> beforeFilter) {
+        this.beforeFilter = beforeFilter;
+        return this;
+    }
+
+    public ImageCaptchaVerifyConfigurer<H> authenticationFilterConfigurer(
+      Class<? extends AbstractAuthenticationFilterConfigurer> authenticationFilterConfigurer) {
+        this.authenticationFilterConfigurer = authenticationFilterConfigurer;
+        return this;
     }
 
     /**
