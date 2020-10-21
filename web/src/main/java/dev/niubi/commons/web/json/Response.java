@@ -282,6 +282,9 @@ public class Response<T> {
         }
 
         public Builder extra(Map<String, ?> extra) {
+            if (extra == null) {
+                return this;
+            }
             if (this.extra == null) {
                 this.extra = new HashMap<>();
             }
