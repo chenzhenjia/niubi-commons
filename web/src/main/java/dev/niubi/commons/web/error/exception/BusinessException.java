@@ -32,6 +32,10 @@ public class BusinessException extends RuntimeException {
         super("未知错误");
     }
 
+    public BusinessException(Response<?> response) {
+        this(response.getMsg(), response.getCode(), response.getHttpStatus());
+    }
+
     public BusinessException(String message, String code) {
         this(message, code, null);
     }
