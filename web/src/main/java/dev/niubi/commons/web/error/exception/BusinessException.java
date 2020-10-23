@@ -25,7 +25,7 @@ import dev.niubi.commons.web.json.Response;
  * @since 2020/1/29
  */
 public class BusinessException extends RuntimeException {
-    private String code = Response.DefaultCode.BUSINESS;
+    private String code = Response.Codes.BUSINESS;
     private HttpStatus status;
 
     public BusinessException() {

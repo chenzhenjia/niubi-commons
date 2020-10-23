@@ -48,7 +48,7 @@ import lombok.Setter;
  */
 @Data
 public class Response<T> {
-    public static class DefaultCode {
+    public static class Codes {
         /**
          * 成功
          */
@@ -135,7 +135,7 @@ public class Response<T> {
     }
 
     public boolean isSuccess() {
-        return DefaultCode.SUCCESS.equals(code);
+        return Codes.SUCCESS.equals(code);
     }
 
     @NotNull
@@ -189,7 +189,7 @@ public class Response<T> {
     }
 
     public static Builder ok(String msg) {
-        return new Builder(DefaultCode.SUCCESS).status(HttpStatus.OK).msg(msg);
+        return new Builder(Codes.SUCCESS).status(HttpStatus.OK).msg(msg);
     }
 
     public static Builder ok() {
@@ -197,7 +197,7 @@ public class Response<T> {
     }
 
     public static Builder business(String msg) {
-        return code(DefaultCode.BUSINESS).msg(msg);
+        return code(Codes.BUSINESS).msg(msg);
     }
 
     public static <T> Response<T> business(String msg, T body) {
@@ -213,7 +213,7 @@ public class Response<T> {
     }
 
     public static Builder deleteFailure(String msg) {
-        return new Builder(DefaultCode.DELETE_FAILURE).msg(msg);
+        return new Builder(Codes.DELETE_FAILURE).msg(msg);
     }
 
     public static <T> Response<T> deleteFailure(T body) {
@@ -229,7 +229,7 @@ public class Response<T> {
     }
 
     public static Builder notfound(String msg) {
-        return code(DefaultCode.NOT_FOUND).msg(msg).status(HttpStatus.NOT_FOUND);
+        return code(Codes.NOT_FOUND).msg(msg).status(HttpStatus.NOT_FOUND);
     }
 
     public static <T> Response<T> unknown(T body) {
@@ -245,7 +245,7 @@ public class Response<T> {
     }
 
     public static Builder unknown(String msg) {
-        return code(DefaultCode.UNKNOWN).msg(msg)
+        return code(Codes.UNKNOWN).msg(msg)
           .status(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -309,7 +309,7 @@ public class Response<T> {
         }
 
         public <T> Response<T> body(T body) {
-            return new Response<>(Optional.ofNullable(code).orElse(DefaultCode.UNKNOWN), status, body, msg, extra);
+            return new Response<>(Optional.ofNullable(code).orElse(Codes.UNKNOWN), status, body, msg, extra);
         }
     }
 
