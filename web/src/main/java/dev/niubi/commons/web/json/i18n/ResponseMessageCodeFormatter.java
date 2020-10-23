@@ -21,7 +21,6 @@ package dev.niubi.commons.web.json.i18n;
  * @since 2020/4/12
  */
 public interface ResponseMessageCodeFormatter {
-    DefaultMsg defaultMsg();
 
     String getMsg(String msg);
 

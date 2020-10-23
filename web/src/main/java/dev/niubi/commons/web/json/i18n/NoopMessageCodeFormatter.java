@@ -16,18 +16,15 @@
 
 package dev.niubi.commons.web.json.i18n;
 
-import lombok.Builder;
-import lombok.Data;
-
 /**
  * @author chenzhenjia
- * @since 2020/4/12
+ * @since 2020/10/21
  */
-@Data
-@Builder
-public class DefaultMsg {
-    private String ok;
-    private String unknown;
-    private String notFound;
-    private String deleteFailure;
+public class NoopMessageCodeFormatter implements ResponseMessageCodeFormatter {
+    public static final ResponseMessageCodeFormatter INSTANCE = new NoopMessageCodeFormatter();
+
+    @Override
+    public String getMsg(String msg) {
+        return msg;
+    }
 }

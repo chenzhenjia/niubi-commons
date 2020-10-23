@@ -34,19 +34,12 @@ import java.util.Optional;
 
 import javax.servlet.http.HttpServletResponse;
 
-import dev.niubi.commons.web.json.i18n.ResponseMessageCodeFormatter;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-
 /**
  * 公用返回对象
  *
  * @author chenzhenjia
  * @since 2019/11/21
  */
-@Data
 public class Response<T> {
     public static class Codes {
         /**
@@ -65,58 +58,61 @@ public class Response<T> {
         public static final String DELETE_FAILURE = "deleteFailure";
     }
 
-    private static ResponseMessageCodeFormatter messageCodeFormatter;
-    private static volatile ObjectMapper objectMapper = new ObjectMapper();
-
-    public static synchronized void setObjectMapper(ObjectMapper newObjectMapper) {
-        Objects.requireNonNull(newObjectMapper, "ObjectMapper 不能为空");
-        objectMapper = newObjectMapper;
+    public static class I18nMsgCodes {
+        public static final String SUCCESS = "{Response.success}";
+        public static final String UNKNOWN = "{Response.unknown}";
+        public static final String NOT_FOUND = "{Response.notfound}";
+        public static final String DELETE_FAILURE = "{Response.deleteFailure}";
     }
 
-    protected static void setMessageCodeFormatter(ResponseMessageCodeFormatter messageCodeFormatter) {
-        Response.messageCodeFormatter = messageCodeFormatter;
+    private static volatile ObjectMapper objectMapper;
+
+    private synchronized static ObjectMapper getObjectMapper() {
+        if (objectMapper == null) {
+            objectMapper = new ObjectMapper();
+        }
+        return objectMapper;
+    }
+
+    static synchronized void setObjectMapper(ObjectMapper newObjectMapper) {
+        Objects.requireNonNull(newObjectMapper, "ObjectMapper 不能为空");
+        objectMapper = newObjectMapper;
     }
 
     /**
      * 状态码
      */
-    private HttpStatus status;
-    @Getter
-    private String code;
+    private final HttpStatus status;
+    private final String code;
     /**
      * 消息
      */
-    @Getter
     private String msg;
     /**
      * 内容
      */
-    private T body;
+    private final T body;
     /**
      * 时间
      */
-    @Getter
-    @Setter(AccessLevel.PACKAGE)
     private Date timestamp;
     /**
      * 返回的额外的数据
      */
-    private Map<String, Object> extra;
+    private final Map<String, Object> extra;
 
     @JsonCreator
     public Response(@JsonProperty("code") String code,
                     @JsonProperty("status") Integer status,
                     @JsonProperty("body") T body, @JsonProperty("msg") String msg,
                     @JsonProperty("extra") Map<String, Object> extra) {
-        this.status = Optional.ofNullable(status).map(HttpStatus::valueOf).orElse(null);
-        this.msg = msg;
-        this.body = body;
-        this.code = code;
-        this.extra = extra;
+        this(code, Optional.ofNullable(status).map(HttpStatus::valueOf).orElse(null), body, msg, extra);
     }
 
     public Response(String code, HttpStatus status, T body, String msg,
                     Map<String, Object> extra) {
+        Objects.requireNonNull(msg, "msg 不能为空");
+        Objects.requireNonNull(code, "code 不能为空");
         this.status = status;
         this.msg = msg;
         this.body = body;
@@ -132,6 +128,34 @@ public class Response<T> {
     @JsonIgnore
     public HttpStatus getHttpStatus() {
         return Optional.ofNullable(status).orElse(HttpStatus.OK);
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public T getBody() {
+        return body;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public Map<String, Object> getExtra() {
+        return extra;
+    }
+
+    void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
     }
 
     public boolean isSuccess() {
@@ -167,7 +191,7 @@ public class Response<T> {
     }
 
     public void write(HttpServletResponse response) throws IOException {
-        objectMapper.writeValue(response.getWriter(), writeHeader(response).toMap());
+        getObjectMapper().writeValue(response.getWriter(), writeHeader(response).toMap());
     }
 
     public void writeAndFlash(HttpServletResponse response) throws IOException {
@@ -193,7 +217,7 @@ public class Response<T> {
     }
 
     public static Builder ok() {
-        return ok(messageCodeFormatter.defaultMsg().getOk());
+        return ok(I18nMsgCodes.SUCCESS);
     }
 
     public static Builder business(String msg) {
@@ -209,7 +233,7 @@ public class Response<T> {
     }
 
     public static Builder deleteFailure() {
-        return deleteFailure(messageCodeFormatter.defaultMsg().getDeleteFailure());
+        return deleteFailure(I18nMsgCodes.DELETE_FAILURE);
     }
 
     public static Builder deleteFailure(String msg) {
@@ -225,7 +249,7 @@ public class Response<T> {
     }
 
     public static Builder notfound() {
-        return notfound(messageCodeFormatter.defaultMsg().getNotFound());
+        return notfound(I18nMsgCodes.NOT_FOUND);
     }
 
     public static Builder notfound(String msg) {
@@ -237,7 +261,7 @@ public class Response<T> {
     }
 
     public static Builder unknown() {
-        return unknown(messageCodeFormatter.defaultMsg().getUnknown());
+        return unknown(I18nMsgCodes.UNKNOWN);
     }
 
     public static Builder copy(Response<?> response) {
@@ -269,7 +293,7 @@ public class Response<T> {
         }
 
         public Builder msg(String msg) {
-            this.msg = messageCodeFormatter.getMsg(msg);
+            this.msg = msg;
             return this;
         }
 

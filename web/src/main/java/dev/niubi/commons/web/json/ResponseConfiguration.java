@@ -43,8 +43,9 @@ public class ResponseConfiguration {
 
     @Bean
     @Lazy(false)
-    public ResponseCustomizeAdvice responseAdvice(ObjectProvider<ResponseCustomizer> responseCustomizers) {
-        return new ResponseCustomizeAdvice(responseCustomizers.getIfAvailable(() -> response -> response));
+    public ResponseCustomizeAdvice responseAdvice(ObjectProvider<ResponseCustomizer> responseCustomizers,
+                                                  ResponseMessageCodeFormatter messageCodeFormatter) {
+        return new ResponseCustomizeAdvice(responseCustomizers.getIfAvailable(() -> response -> response), messageCodeFormatter);
     }
 
     protected MessageSource messageSource() {
@@ -66,10 +67,8 @@ public class ResponseConfiguration {
     }
 
     @Bean
-    public ApplicationListener<ContextRefreshedEvent> responseContextInitFinishListener(
-      ResponseMessageCodeFormatter messageCodeFormatter, ObjectMapper objectMapper) {
+    public ApplicationListener<ContextRefreshedEvent> responseContextInitFinishListener(ObjectMapper objectMapper) {
         return event -> {
-            Response.setMessageCodeFormatter(messageCodeFormatter);
             Response.setObjectMapper(objectMapper);
         };
     }

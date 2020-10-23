@@ -18,30 +18,26 @@ package dev.niubi.commons.web.json.i18n;
 
 import org.springframework.context.MessageSource;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * @author chenzhenjia
  * @since 2020/4/12
  */
 public class DefaultMessageCodeFormatter extends AbstractResponseMsgFormatter {
-
-    public static final DefaultMsg DEFAULT_MSG = DefaultMsg.builder()
-      .deleteFailure("Response.deleteFailure")
-      .notFound("Response.notfound")
-      .ok("Response.success")
-      .unknown("Response.unknown")
-      .build();
+    public static final Pattern REG = Pattern.compile("\\{(?<code>.+)}");
 
     public DefaultMessageCodeFormatter(MessageSource messageSource) {
         super(messageSource);
     }
 
     @Override
-    public DefaultMsg defaultMsg() {
-        return DEFAULT_MSG;
-    }
-
-    @Override
     protected String getCode(String msg) {
-        return msg.replace("{", "").replace("}", "");
+        Matcher matcher = REG.matcher(msg);
+        if (matcher.find()) {
+            return matcher.group("code");
+        }
+        return null;
     }
 }

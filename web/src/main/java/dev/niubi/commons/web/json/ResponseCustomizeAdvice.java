@@ -30,6 +30,8 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 
+import dev.niubi.commons.web.json.i18n.ResponseMessageCodeFormatter;
+
 /**
  * @author chenzhenjia
  * @since 2019/12/11
@@ -38,9 +40,11 @@ import java.util.Optional;
 @RestControllerAdvice
 public class ResponseCustomizeAdvice implements ResponseBodyAdvice<Object> {
     private final ResponseCustomizer responseCustomizer;
+    private final ResponseMessageCodeFormatter messageCodeFormatter;
 
-    public ResponseCustomizeAdvice(ResponseCustomizer responseCustomizer) {
+    public ResponseCustomizeAdvice(ResponseCustomizer responseCustomizer, ResponseMessageCodeFormatter messageCodeFormatter) {
         this.responseCustomizer = responseCustomizer;
+        this.messageCodeFormatter = messageCodeFormatter;
     }
 
     @Override
@@ -57,6 +61,7 @@ public class ResponseCustomizeAdvice implements ResponseBodyAdvice<Object> {
             Response<?> responseBody = (Response<?>) body;
             response.setStatusCode(responseBody.getHttpStatus());
             responseBody.setTimestamp(new Date());
+            responseBody.setMsg(messageCodeFormatter.getMsg(responseBody.getMsg()));
             return responseCustomizer.customize((Response<?>) body);
         }
         return body;

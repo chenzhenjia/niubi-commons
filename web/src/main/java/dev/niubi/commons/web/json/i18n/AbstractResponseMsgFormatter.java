@@ -19,6 +19,8 @@ package dev.niubi.commons.web.json.i18n;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 
+import java.util.Objects;
+
 /**
  * @author chenzhenjia
  * @since 2020/4/12
@@ -34,8 +36,11 @@ public abstract class AbstractResponseMsgFormatter implements ResponseMessageCod
     @Override
     public String getMsg(String msg) {
         String code = getCode(msg);
+        if (Objects.isNull(code)) {
+            return msg;
+        }
         String message = messageSource.getMessage(code, new Object[]{}, NOT_FOUND_MESSAGE, LocaleContextHolder.getLocale());
-        if(NOT_FOUND_MESSAGE.equals(message)){
+        if (NOT_FOUND_MESSAGE.equals(message)) {
             return msg;
         }
         return message;
