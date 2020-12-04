@@ -184,14 +184,14 @@ public class Response<T> {
     }
 
     public Response<T> writeHeader(HttpServletResponse response) {
-        response.setCharacterEncoding("utf-8");
+        response.setCharacterEncoding("UTF-8");
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(getStatus());
         return this;
     }
 
     public void write(HttpServletResponse response) throws IOException {
-        getObjectMapper().writeValue(response.getWriter(), writeHeader(response).toMap());
+        write(getObjectMapper(), response);
     }
 
     public void writeAndFlash(HttpServletResponse response) throws IOException {
@@ -200,7 +200,8 @@ public class Response<T> {
     }
 
     public void write(ObjectMapper objectMapper, HttpServletResponse response) throws IOException {
-        objectMapper.writeValue(response.getWriter(), writeHeader(response).toMap());
+        HashMap<String, Object> value = writeHeader(response).toMap();
+        objectMapper.writeValue(response.getWriter(), value);
     }
 
     public void writeAndFlash(ObjectMapper objectMapper, HttpServletResponse response) throws IOException {
