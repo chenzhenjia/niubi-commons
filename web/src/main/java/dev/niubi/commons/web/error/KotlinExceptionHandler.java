@@ -16,13 +16,21 @@
 
 package dev.niubi.commons.web.error;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.AbstractMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import dev.niubi.commons.web.json.Response;
+import dev.niubi.commons.web.json.i18n.ResponseMessageCodeFormatter;
 import lombok.extern.slf4j.Slf4j;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -34,9 +42,31 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @ControllerAdvice
 @Slf4j
 public class KotlinExceptionHandler {
+    private final ResponseMessageCodeFormatter responseMessageCodeFormatter;
+
+    public KotlinExceptionHandler(ResponseMessageCodeFormatter responseMessageCodeFormatter) {
+        this.responseMessageCodeFormatter = responseMessageCodeFormatter;
+    }
+
     @ExceptionHandler(MissingKotlinParameterException.class)
     public ResponseEntity<Response<?>> handleMissingKotlinParameter(MissingKotlinParameterException e) {
-        Response<Object> response = Response.business(e.getMessage()).status(BAD_REQUEST).msg(e.getMessage()).build();
+        List<JsonMappingException.Reference> path = e.getPath();
+        String nullFieldName = path.stream().findFirst()
+          .map(JsonMappingException.Reference::getFieldName)
+          .orElse(null);
+        String notNull = responseMessageCodeFormatter.getMsg("KotlinExceptionHandler.notNull");
+        String msg = String.format("[%s]%s", nullFieldName, notNull);
+        Map<String, String> extra = path.stream()
+          .map(JsonMappingException.Reference::getFieldName)
+          .filter(Objects::nonNull)
+          .map(s -> {
+              return new AbstractMap.SimpleEntry<>(s, notNull);
+          })
+          .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey,
+            AbstractMap.SimpleEntry::getValue));
+        Response<Object> response = Response.business(msg)
+          .extra(extra)
+          .status(BAD_REQUEST).build();
         return ResponseEntity.badRequest().body(response);
     }
 }
