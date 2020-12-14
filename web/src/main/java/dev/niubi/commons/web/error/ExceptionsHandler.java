@@ -61,24 +61,26 @@ public class ExceptionsHandler {
     }
 
     protected Response<?> bindingResultResponseMessage(BindingResult bindingResult) {
-        Map<String, Object> map = bindingResult.getFieldErrors()
+        Map<String, List<String>> map = bindingResult.getFieldErrors()
           .stream()
           .filter(fieldError -> Objects.nonNull(fieldError.getDefaultMessage()))
-          .collect(Collectors.toMap(FieldError::getField, DefaultMessageSourceResolvable::getDefaultMessage));
+          .collect(Collectors.groupingBy(FieldError::getField,
+            Collectors.mapping(DefaultMessageSourceResolvable::getDefaultMessage, Collectors.toList())));
 
         Map<String, List<String>> objectErrorMap = bindingResult.getGlobalErrors()
           .stream()
           .filter(objectError -> Objects.nonNull(objectError.getDefaultMessage()))
-          .collect(Collectors.groupingBy(ObjectError::getObjectName, Collectors.mapping(DefaultMessageSourceResolvable::getDefaultMessage, Collectors.toList())));
-
+          .collect(Collectors.groupingBy(ObjectError::getObjectName,
+            Collectors.mapping(DefaultMessageSourceResolvable::getDefaultMessage,
+              Collectors.toList())));
 
         map.putAll(objectErrorMap);
 
         String msg = map.values().stream().findFirst()
           .map(o -> {
               if (o instanceof List) {
-                  if (((List) o).size() > 0) {
-                      return ((List) o).get(0).toString();
+                  if (o.size() > 0) {
+                      return o.get(0);
                   }
               }
               return o.toString();
