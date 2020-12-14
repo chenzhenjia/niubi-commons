@@ -24,5 +24,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
  * @since 2020/6/12
  */
 public interface MobileUserDetailsService {
-    UserDetails loadUserByMobile(String mobile) throws UsernameNotFoundException;
+
+  UserDetails loadUserByMobile(String mobile) throws UsernameNotFoundException;
 }

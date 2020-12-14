@@ -18,7 +18,6 @@ package dev.niubi.commons.security.captcha.mobile;
 
 import java.util.Objects;
 import java.util.Optional;
-
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -28,29 +27,30 @@ import javax.servlet.http.HttpServletRequest;
  * @since 2020/6/14
  */
 public class SessionMobileCaptchaValidator implements MobileCaptchaValidator {
-    public static final String CAPTCHA_VERIFY_ATTR = "SessionMobileCaptchaValidator";
-    private String captchaAttrName = CAPTCHA_VERIFY_ATTR;
 
-    public SessionMobileCaptchaValidator() {
-    }
+  public static final String CAPTCHA_VERIFY_ATTR = "SessionMobileCaptchaValidator";
+  private String captchaAttrName = CAPTCHA_VERIFY_ATTR;
 
-    public SessionMobileCaptchaValidator(String captchaAttrName) {
-        this.captchaAttrName = captchaAttrName;
-    }
+  public SessionMobileCaptchaValidator() {
+  }
 
-    public void setCaptchaAttrName(String captchaAttrName) {
-        this.captchaAttrName = captchaAttrName;
-    }
+  public SessionMobileCaptchaValidator(String captchaAttrName) {
+    this.captchaAttrName = captchaAttrName;
+  }
 
-    @Override
-    public boolean valid(HttpServletRequest request, String mobile, String code) {
-        Object attr = request.getSession().getAttribute(captchaAttrName);
-        if (Objects.isNull(attr)) {
-            return false;
-        }
-        return Optional.of(attr)
-          .map(Object::toString)
-          .map(s -> s.equals(code))
-          .orElse(false);
+  public void setCaptchaAttrName(String captchaAttrName) {
+    this.captchaAttrName = captchaAttrName;
+  }
+
+  @Override
+  public boolean valid(HttpServletRequest request, String mobile, String code) {
+    Object attr = request.getSession().getAttribute(captchaAttrName);
+    if (Objects.isNull(attr)) {
+      return false;
     }
+    return Optional.of(attr)
+        .map(Object::toString)
+        .map(s -> s.equals(code))
+        .orElse(false);
+  }
 }

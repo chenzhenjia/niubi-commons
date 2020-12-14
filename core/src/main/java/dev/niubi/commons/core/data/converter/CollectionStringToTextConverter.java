@@ -16,20 +16,17 @@
 
 package dev.niubi.commons.core.data.converter;
 
+import static dev.niubi.commons.core.data.converter.ObjectMapperInstance.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Objects;
-
 import javax.persistence.AttributeConverter;
-
 import lombok.extern.slf4j.Slf4j;
-
-import static dev.niubi.commons.core.data.converter.ObjectMapperInstance.OBJECT_MAPPER;
 
 
 /**
@@ -47,30 +44,35 @@ import static dev.niubi.commons.core.data.converter.ObjectMapperInstance.OBJECT_
  */
 @Slf4j
 public class CollectionStringToTextConverter implements AttributeConverter<Collection<String>, String>, Serializable {
-    @Override
-    public String convertToDatabaseColumn(Collection<String> attribute) {
-        if (Objects.isNull(attribute)) return null;
-        try {
-            return OBJECT_MAPPER.writeValueAsString(attribute);
-        } catch (JsonProcessingException e) {
-            log.debug("list convert to json string error", e);
-            return null;
-        }
-    }
 
-    @Override
-    public Collection<String> convertToEntityAttribute(String dbData) {
-        if (Objects.isNull(dbData)) return null;
-        try {
-            return OBJECT_MAPPER.readValue(dbData, new TypeReference<Collection<String>>() {
-                @Override
-                public Type getType() {
-                    return super.getType();
-                }
-            });
-        } catch (IOException e) {
-            log.debug("json string convert to list error", e);
-            return null;
-        }
+  @Override
+  public String convertToDatabaseColumn(Collection<String> attribute) {
+    if (Objects.isNull(attribute)) {
+      return null;
     }
+    try {
+      return OBJECT_MAPPER.writeValueAsString(attribute);
+    } catch (JsonProcessingException e) {
+      log.debug("list convert to json string error", e);
+      return null;
+    }
+  }
+
+  @Override
+  public Collection<String> convertToEntityAttribute(String dbData) {
+    if (Objects.isNull(dbData)) {
+      return null;
+    }
+    try {
+      return OBJECT_MAPPER.readValue(dbData, new TypeReference<Collection<String>>() {
+        @Override
+        public Type getType() {
+          return super.getType();
+        }
+      });
+    } catch (IOException e) {
+      log.debug("json string convert to list error", e);
+      return null;
+    }
+  }
 }

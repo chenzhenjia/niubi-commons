@@ -16,20 +16,17 @@
 
 package dev.niubi.commons.core.data.converter;
 
+import static dev.niubi.commons.core.data.converter.ObjectMapperInstance.OBJECT_MAPPER;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Objects;
-
 import javax.persistence.AttributeConverter;
-
 import lombok.extern.slf4j.Slf4j;
-
-import static dev.niubi.commons.core.data.converter.ObjectMapperInstance.OBJECT_MAPPER;
 
 
 /**
@@ -49,30 +46,34 @@ import static dev.niubi.commons.core.data.converter.ObjectMapperInstance.OBJECT_
 public class CollectionStringToBlobConverter implements AttributeConverter<Collection<String>, byte[]>, Serializable {
 
 
-    @Override
-    public byte[] convertToDatabaseColumn(Collection<String> attribute) {
-        if (Objects.isNull(attribute)) return null;
-        try {
-            return OBJECT_MAPPER.writeValueAsBytes(attribute);
-        } catch (JsonProcessingException e) {
-            log.debug("list convert to json bytes error", e);
-            return null;
-        }
+  @Override
+  public byte[] convertToDatabaseColumn(Collection<String> attribute) {
+    if (Objects.isNull(attribute)) {
+      return null;
     }
+    try {
+      return OBJECT_MAPPER.writeValueAsBytes(attribute);
+    } catch (JsonProcessingException e) {
+      log.debug("list convert to json bytes error", e);
+      return null;
+    }
+  }
 
-    @Override
-    public Collection<String> convertToEntityAttribute(byte[] dbData) {
-        if (Objects.isNull(dbData)) return null;
-        try {
-            return OBJECT_MAPPER.readValue(dbData, new TypeReference<Collection<String>>() {
-                @Override
-                public Type getType() {
-                    return super.getType();
-                }
-            });
-        } catch (IOException e) {
-            log.debug("json bytes convert to list error", e);
-            return null;
-        }
+  @Override
+  public Collection<String> convertToEntityAttribute(byte[] dbData) {
+    if (Objects.isNull(dbData)) {
+      return null;
     }
+    try {
+      return OBJECT_MAPPER.readValue(dbData, new TypeReference<Collection<String>>() {
+        @Override
+        public Type getType() {
+          return super.getType();
+        }
+      });
+    } catch (IOException e) {
+      log.debug("json bytes convert to list error", e);
+      return null;
+    }
+  }
 }

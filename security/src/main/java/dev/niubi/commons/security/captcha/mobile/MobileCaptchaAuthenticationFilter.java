@@ -16,20 +16,17 @@
 
 package dev.niubi.commons.security.captcha.mobile;
 
+import dev.niubi.commons.security.captcha.exception.CaptchaAuthenticationException;
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import dev.niubi.commons.security.captcha.exception.CaptchaAuthenticationException;
 
 /**
  * 手机号验证码授权的过滤器
@@ -38,72 +35,71 @@ import dev.niubi.commons.security.captcha.exception.CaptchaAuthenticationExcepti
  * @since 2020/6/12
  */
 public class MobileCaptchaAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
-    public static final String SPRING_SECURITY_MOBILE_MOBILE_KEY = "mobile";
-    public static final String SPRING_SECURITY_MOBILE_CODE_KEY = "code";
 
-    public String mobileParameter = SPRING_SECURITY_MOBILE_MOBILE_KEY;
-    public String codeParameter = SPRING_SECURITY_MOBILE_CODE_KEY;
-    private MobileCaptchaValidator captchaValidator = new SessionMobileCaptchaValidator();
+  public static final String SPRING_SECURITY_MOBILE_MOBILE_KEY = "mobile";
+  public static final String SPRING_SECURITY_MOBILE_CODE_KEY = "code";
 
-    public void setCodeParameter(String codeParameter) {
-        this.codeParameter = codeParameter;
-    }
+  public String mobileParameter = SPRING_SECURITY_MOBILE_MOBILE_KEY;
+  public String codeParameter = SPRING_SECURITY_MOBILE_CODE_KEY;
+  private MobileCaptchaValidator captchaValidator = new SessionMobileCaptchaValidator();
 
-    public void setMobileParameter(String mobileParameter) {
-        this.mobileParameter = mobileParameter;
-    }
+  public MobileCaptchaAuthenticationFilter() {
+    super(new AntPathRequestMatcher("/login/mobile", "POST"));
+  }
 
-    public void setCaptchaValidator(
+  public MobileCaptchaAuthenticationFilter(String filterProcessesUrl) {
+    super(filterProcessesUrl);
+  }
+
+  public void setCodeParameter(String codeParameter) {
+    this.codeParameter = codeParameter;
+  }
+
+  public void setMobileParameter(String mobileParameter) {
+    this.mobileParameter = mobileParameter;
+  }
+
+  public void setCaptchaValidator(
       MobileCaptchaValidator captchaValidator) {
-        this.captchaValidator = captchaValidator;
-    }
+    this.captchaValidator = captchaValidator;
+  }
 
-    public MobileCaptchaAuthenticationFilter() {
-        super(new AntPathRequestMatcher("/login/mobile", "POST"));
-    }
-
-    public MobileCaptchaAuthenticationFilter(String filterProcessesUrl) {
-        super(filterProcessesUrl);
-    }
-
-    @Override
-    public Authentication attemptAuthentication(
+  @Override
+  public Authentication attemptAuthentication(
       HttpServletRequest request, HttpServletResponse response)
       throws AuthenticationException, IOException, ServletException {
-        if (!request.getMethod().equals("POST")) {
-            throw new AuthenticationServiceException(
-              "Authentication method not supported: " + request.getMethod());
-        }
-        String mobile = obtainMobile(request);
-        String code = obtainCode(request);
-        if (code == null) {
-            code = "";
-        }
-        if (mobile == null) {
-            mobile = "";
-        }
-        boolean verify = captchaValidator.valid(request, mobile, code);
-        if (!verify) {
-            throw new CaptchaAuthenticationException(messages.getMessage(
-              "MobileCodeAuthenticationFilter.verifyFailed",
-              "手机验证码错误"));
-        }
-
-
-        mobile = mobile.trim();
-        MobileCaptchaAuthenticationToken authRequest = new MobileCaptchaAuthenticationToken(mobile, code);
-        authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
-        return this.getAuthenticationManager().authenticate(authRequest);
+    if (!request.getMethod().equals("POST")) {
+      throw new AuthenticationServiceException(
+          "Authentication method not supported: " + request.getMethod());
+    }
+    String mobile = obtainMobile(request);
+    String code = obtainCode(request);
+    if (code == null) {
+      code = "";
+    }
+    if (mobile == null) {
+      mobile = "";
+    }
+    boolean verify = captchaValidator.valid(request, mobile, code);
+    if (!verify) {
+      throw new CaptchaAuthenticationException(messages.getMessage(
+          "MobileCodeAuthenticationFilter.verifyFailed",
+          "手机验证码错误"));
     }
 
-    @Nullable
-    protected String obtainMobile(HttpServletRequest request) {
-        return request.getParameter(mobileParameter);
-    }
+    mobile = mobile.trim();
+    MobileCaptchaAuthenticationToken authRequest = new MobileCaptchaAuthenticationToken(mobile, code);
+    authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
+    return this.getAuthenticationManager().authenticate(authRequest);
+  }
 
-    @Nullable
-    protected String obtainCode(HttpServletRequest request) {
-        return request.getParameter(codeParameter);
-    }
+  @Nullable
+  protected String obtainMobile(HttpServletRequest request) {
+    return request.getParameter(mobileParameter);
+  }
 
+  @Nullable
+  protected String obtainCode(HttpServletRequest request) {
+    return request.getParameter(codeParameter);
+  }
 }

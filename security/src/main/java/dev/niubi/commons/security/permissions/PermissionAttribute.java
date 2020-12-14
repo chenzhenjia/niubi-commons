@@ -23,20 +23,21 @@ import org.springframework.security.access.ConfigAttribute;
  * @since 2019/11/21
  */
 public class PermissionAttribute implements ConfigAttribute {
-    private final String permission;
-    private final String tag;
 
-    public PermissionAttribute(String permission, String tag) {
-        this.permission = permission;
-        this.tag = tag;
-    }
+  private final String permission;
+  private final String tag;
 
-    @Override
-    public String getAttribute() {
-        return permission;
-    }
+  public PermissionAttribute(String permission, String tag) {
+    this.permission = permission;
+    this.tag = tag;
+  }
 
-    public String getTag() {
-        return tag;
-    }
+  @Override
+  public String getAttribute() {
+    return permission;
+  }
+
+  public String getTag() {
+    return tag;
+  }
 }

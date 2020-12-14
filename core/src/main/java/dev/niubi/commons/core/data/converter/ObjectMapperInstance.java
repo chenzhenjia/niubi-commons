@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
-
 import java.util.Collection;
 
 /**
@@ -28,9 +27,10 @@ import java.util.Collection;
  * @since 2020/5/16
  */
 class ObjectMapperInstance {
-    static final ObjectMapper OBJECT_MAPPER = JsonMapper.builder()
-      .activateDefaultTyping(BasicPolymorphicTypeValidator.builder()
-        .allowIfSubType(Collection.class).build(), ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.WRAPPER_OBJECT)
-      .build();
 
+  static final ObjectMapper OBJECT_MAPPER = JsonMapper.builder()
+      .activateDefaultTyping(BasicPolymorphicTypeValidator.builder()
+              .allowIfSubType(Collection.class).build(), ObjectMapper.DefaultTyping.NON_FINAL,
+          JsonTypeInfo.As.WRAPPER_OBJECT)
+      .build();
 }

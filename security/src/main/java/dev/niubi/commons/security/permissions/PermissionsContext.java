@@ -26,8 +26,7 @@ import java.util.Set;
  */
 public interface PermissionsContext {
 
-    Set<String> getPermissions();
+  Set<String> getPermissions();
 
-    void setPermissions(Set<String> permissions);
-
+  void setPermissions(Set<String> permissions);
 }

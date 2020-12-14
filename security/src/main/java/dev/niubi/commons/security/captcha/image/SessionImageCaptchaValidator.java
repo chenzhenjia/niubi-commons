@@ -17,7 +17,6 @@ package dev.niubi.commons.security.captcha.image;
 
 import java.util.Objects;
 import java.util.Optional;
-
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -27,29 +26,30 @@ import javax.servlet.http.HttpServletRequest;
  * @since 2020/6/12
  */
 public class SessionImageCaptchaValidator implements ImageCaptchaValidator {
-    public static final String CAPTCHA_VERIFY_ATTR = "SessionCaptchaVerifyService";
-    private String captchaAttrName = CAPTCHA_VERIFY_ATTR;
 
-    public SessionImageCaptchaValidator() {
-    }
+  public static final String CAPTCHA_VERIFY_ATTR = "SessionCaptchaVerifyService";
+  private String captchaAttrName = CAPTCHA_VERIFY_ATTR;
 
-    public SessionImageCaptchaValidator(String captchaAttrName) {
-        this.captchaAttrName = captchaAttrName;
-    }
+  public SessionImageCaptchaValidator() {
+  }
 
-    public void setCaptchaAttrName(String captchaAttrName) {
-        this.captchaAttrName = captchaAttrName;
-    }
+  public SessionImageCaptchaValidator(String captchaAttrName) {
+    this.captchaAttrName = captchaAttrName;
+  }
 
-    @Override
-    public boolean valid(HttpServletRequest request, String code) {
-        Object attr = request.getSession().getAttribute(captchaAttrName);
-        if (Objects.isNull(attr)) {
-            return false;
-        }
-        return Optional.of(attr)
-          .map(Object::toString)
-          .map(s -> s.equals(code))
-          .orElse(false);
+  public void setCaptchaAttrName(String captchaAttrName) {
+    this.captchaAttrName = captchaAttrName;
+  }
+
+  @Override
+  public boolean valid(HttpServletRequest request, String code) {
+    Object attr = request.getSession().getAttribute(captchaAttrName);
+    if (Objects.isNull(attr)) {
+      return false;
     }
+    return Optional.of(attr)
+        .map(Object::toString)
+        .map(s -> s.equals(code))
+        .orElse(false);
+  }
 }

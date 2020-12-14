@@ -19,9 +19,9 @@ package dev.niubi.commons.web.configuration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.PageableHandlerMethodArgumentResolverCustomizer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.data.domain.Pageable;
 
 /**
  * @author chenzhenjia
@@ -30,15 +30,17 @@ import org.springframework.data.domain.Pageable;
 @Configuration
 @ConditionalOnClass(WebMvcConfigurer.class)
 public class NiubiWebMvcConfiguration {
-    /**
-     * 让 Spring Data 的 Pageable 的分页从第一页开始 <br/> {@link Pageable}
-     */
-    @Configuration
-    @ConditionalOnClass(PageableHandlerMethodArgumentResolverCustomizer.class)
-    public static class PageableResolverCustomizerConfiguration {
-        @Bean
-        public PageableHandlerMethodArgumentResolverCustomizer pageableResolverCustomizer() {
-            return pageableResolver -> pageableResolver.setOneIndexedParameters(true);
-        }
+
+  /**
+   * 让 Spring Data 的 Pageable 的分页从第一页开始 <br/> {@link Pageable}
+   */
+  @Configuration
+  @ConditionalOnClass(PageableHandlerMethodArgumentResolverCustomizer.class)
+  public static class PageableResolverCustomizerConfiguration {
+
+    @Bean
+    public PageableHandlerMethodArgumentResolverCustomizer pageableResolverCustomizer() {
+      return pageableResolver -> pageableResolver.setOneIndexedParameters(true);
     }
+  }
 }

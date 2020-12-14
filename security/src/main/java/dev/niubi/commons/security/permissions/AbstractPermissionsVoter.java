@@ -16,15 +16,14 @@
 
 package dev.niubi.commons.security.permissions;
 
-import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.security.access.AccessDecisionVoter;
-import org.springframework.security.access.ConfigAttribute;
-import org.springframework.security.core.Authentication;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.security.access.AccessDecisionVoter;
+import org.springframework.security.access.ConfigAttribute;
+import org.springframework.security.core.Authentication;
 
 /**
  * 抽象的权限投票器
@@ -34,35 +33,34 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractPermissionsVoter implements AccessDecisionVoter<MethodInvocation> {
 
-    @Override
-    public boolean supports(ConfigAttribute attribute) {
-        return attribute instanceof PermissionAttribute;
+  @Override
+  public boolean supports(ConfigAttribute attribute) {
+    return attribute instanceof PermissionAttribute;
+  }
+
+  @Override
+  public boolean supports(Class<?> clazz) {
+    return MethodInvocation.class.isAssignableFrom(clazz);
+  }
+
+  @Override
+  public int vote(Authentication authentication, MethodInvocation object, Collection<ConfigAttribute> attributes) {
+    if (Objects.isNull(attributes) || Objects.isNull(authentication)) {
+      return AccessDecisionVoter.ACCESS_ABSTAIN;
     }
 
-    @Override
-    public boolean supports(Class<?> clazz) {
-        return MethodInvocation.class.isAssignableFrom(clazz);
+    List<String> attrs = attributes.stream()
+        .map(ConfigAttribute::getAttribute)
+        .collect(Collectors.toList());
+    PermissionsContext context = loadPermissions(authentication);
+    boolean vote = vote(context, attrs);
+    if (vote) {
+      return AccessDecisionVoter.ACCESS_GRANTED;
     }
+    return AccessDecisionVoter.ACCESS_DENIED;
+  }
 
-    @Override
-    public int vote(Authentication authentication, MethodInvocation object, Collection<ConfigAttribute> attributes) {
-        if (Objects.isNull(attributes) || Objects.isNull(authentication)) {
-            return AccessDecisionVoter.ACCESS_ABSTAIN;
-        }
+  protected abstract PermissionsContext loadPermissions(Authentication authentication);
 
-        List<String> attrs = attributes.stream()
-          .map(ConfigAttribute::getAttribute)
-          .collect(Collectors.toList());
-        PermissionsContext context = loadPermissions(authentication);
-        boolean vote = vote(context, attrs);
-        if (vote) {
-            return AccessDecisionVoter.ACCESS_GRANTED;
-        }
-        return AccessDecisionVoter.ACCESS_DENIED;
-    }
-
-    protected abstract PermissionsContext loadPermissions(Authentication authentication);
-
-    protected abstract boolean vote(PermissionsContext context, List<String> attrs);
-
+  protected abstract boolean vote(PermissionsContext context, List<String> attrs);
 }

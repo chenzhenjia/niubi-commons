@@ -21,10 +21,11 @@ package dev.niubi.commons.web.json.i18n;
  * @since 2020/10/21
  */
 public class NoopMessageCodeFormatter implements ResponseMessageCodeFormatter {
-    public static final ResponseMessageCodeFormatter INSTANCE = new NoopMessageCodeFormatter();
 
-    @Override
-    public String getMsg(String msg) {
-        return msg;
-    }
+  public static final ResponseMessageCodeFormatter INSTANCE = new NoopMessageCodeFormatter();
+
+  @Override
+  public String getMsg(String msg) {
+    return msg;
+  }
 }

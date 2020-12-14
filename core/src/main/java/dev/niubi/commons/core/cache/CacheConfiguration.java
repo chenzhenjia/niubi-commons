@@ -16,6 +16,12 @@
 
 package dev.niubi.commons.core.cache;
 
+import static org.springframework.data.redis.cache.RedisCacheConfiguration.defaultCacheConfig;
+
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -24,13 +30,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.core.RedisOperations;
-
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static org.springframework.data.redis.cache.RedisCacheConfiguration.defaultCacheConfig;
 
 /**
  * 自定义的缓存设置,现在仅支持 Redis
@@ -42,57 +41,57 @@ import static org.springframework.data.redis.cache.RedisCacheConfiguration.defau
 @EnableConfigurationProperties(value = CacheProperties.class)
 @ConditionalOnClass(RedisOperations.class)
 public class CacheConfiguration {
-    private final CacheProperties cacheProperties;
 
-    @Autowired
-    public CacheConfiguration(CacheProperties cacheProperties) {
-        this.cacheProperties = cacheProperties;
+  private final CacheProperties cacheProperties;
+
+  @Autowired
+  public CacheConfiguration(CacheProperties cacheProperties) {
+    this.cacheProperties = cacheProperties;
+  }
+
+  @Bean
+  public RedisCacheManagerBuilderCustomizer niuBiRedisCacheManagerBuilderCustomizer() {
+    return builder -> {
+      Map<String, CacheProperties.Redis> redisMap = cacheProperties.getRedis();
+      if (Objects.isNull(redisMap)) {
+        return;
+      }
+      CacheProperties.Redis defaultConfig = redisMap
+          .get("default");
+      if (Objects.nonNull(defaultConfig)) {
+        builder.cacheDefaults(redisCacheConfiguration(defaultConfig));
+      }
+
+      Map<String, RedisCacheConfiguration> configs = redisMap
+          .entrySet()
+          .stream()
+          .filter(en -> !en.getKey().equals("default"))
+          .collect(Collectors.toMap(Map.Entry::getKey, en -> redisCacheConfiguration(en.getValue())));
+      builder.withInitialCacheConfigurations(configs);
+    };
+  }
+
+  protected RedisCacheConfiguration redisCacheConfiguration(CacheProperties.Redis redisProperties) {
+    RedisCacheConfiguration config = defaultCacheConfig();
+    RedisCacheConfiguration finalConfig = config;
+    config = Optional.ofNullable(redisProperties.getKeyPrefix())
+        .map(it -> finalConfig.computePrefixWith(cacheName -> it + "::" + cacheName + "::"))
+        .orElse(config)
+    ;
+    config = Optional.ofNullable(redisProperties.getTimeToLive())
+        .map(config::entryTtl)
+        .orElse(config)
+    ;
+    config = Optional.ofNullable(redisProperties.getTimeToLive())
+        .map(config::entryTtl)
+        .orElse(config)
+    ;
+    if (!redisProperties.isCacheNullValues()) {
+      config = config.disableCachingNullValues();
     }
-
-    @Bean
-    public RedisCacheManagerBuilderCustomizer niuBiRedisCacheManagerBuilderCustomizer() {
-        return builder -> {
-            Map<String, CacheProperties.Redis> redisMap = cacheProperties.getRedis();
-            if (Objects.isNull(redisMap)) {
-                return;
-            }
-            CacheProperties.Redis defaultConfig = redisMap
-              .get("default");
-            if (Objects.nonNull(defaultConfig)) {
-                builder.cacheDefaults(redisCacheConfiguration(defaultConfig));
-            }
-
-            Map<String, RedisCacheConfiguration> configs = redisMap
-              .entrySet()
-              .stream()
-              .filter(en -> !en.getKey().equals("default"))
-              .collect(Collectors.toMap(Map.Entry::getKey, en -> redisCacheConfiguration(en.getValue())));
-            builder.withInitialCacheConfigurations(configs);
-        };
-    }
-
-    protected RedisCacheConfiguration redisCacheConfiguration(CacheProperties.Redis redisProperties) {
-        RedisCacheConfiguration config = defaultCacheConfig();
-        RedisCacheConfiguration finalConfig = config;
-        config = Optional.ofNullable(redisProperties.getKeyPrefix())
-          .map(it -> finalConfig.computePrefixWith(cacheName -> it + "::" + cacheName + "::"))
-          .orElse(config)
-        ;
-        config = Optional.ofNullable(redisProperties.getTimeToLive())
-          .map(config::entryTtl)
-          .orElse(config)
-        ;
-        config = Optional.ofNullable(redisProperties.getTimeToLive())
-          .map(config::entryTtl)
-          .orElse(config)
-        ;
-        if (!redisProperties.isCacheNullValues()) {
-            config = config.disableCachingNullValues();
-        }
-        // if (!redisProperties.isUseKeyPrefix()) {
-        //     config = config.disableKeyPrefix();
-        // }
-        return config;
-    }
-
+    // if (!redisProperties.isUseKeyPrefix()) {
+    //     config = config.disableKeyPrefix();
+    // }
+    return config;
+  }
 }

@@ -16,9 +16,8 @@
 
 package dev.niubi.commons.security.captcha.image;
 
-import javax.servlet.http.HttpServletRequest;
-
 import dev.niubi.commons.security.captcha.exception.CaptchaAuthenticationException;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 图片验证码验证器
@@ -28,12 +27,12 @@ import dev.niubi.commons.security.captcha.exception.CaptchaAuthenticationExcepti
  */
 @FunctionalInterface
 public interface ImageCaptchaValidator {
-    /**
-     * 验证用户输入的验证码是否正确
-     *
-     * @param request 当前请求
-     * @param code    用户输入的验证码
-     */
-    boolean valid(HttpServletRequest request, String code) throws CaptchaAuthenticationException;
 
+  /**
+   * 验证用户输入的验证码是否正确
+   *
+   * @param request 当前请求
+   * @param code 用户输入的验证码
+   */
+  boolean valid(HttpServletRequest request, String code) throws CaptchaAuthenticationException;
 }

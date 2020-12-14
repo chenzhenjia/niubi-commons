@@ -16,6 +16,14 @@
 
 package dev.niubi.commons.security.captcha.image;
 
+import dev.niubi.commons.security.captcha.exception.CaptchaAuthenticationException;
+import java.io.IOException;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.AuthenticationException;
@@ -29,17 +37,6 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.Assert;
 import org.springframework.web.filter.GenericFilterBean;
 
-import java.io.IOException;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import dev.niubi.commons.security.captcha.exception.CaptchaAuthenticationException;
-
 /**
  * 图片验证码验证拦截器
  *
@@ -47,87 +44,88 @@ import dev.niubi.commons.security.captcha.exception.CaptchaAuthenticationExcepti
  * @since 2020/6/12
  */
 public class ImageCaptchaVerifyFilter extends GenericFilterBean {
-    public static final String SPRING_SECURITY_FORM_VERIFY_CODE_KEY = "captcha";
-    private String verifyCodeParameter = SPRING_SECURITY_FORM_VERIFY_CODE_KEY;
-    protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
-    private RequestMatcher requiresAuthenticationRequestMatcher;
-    private ImageCaptchaValidator captchaValidator;
-    private AuthenticationFailureHandler failureHandler = new SimpleUrlAuthenticationFailureHandler();
 
-    public ImageCaptchaVerifyFilter() {
-        requiresAuthenticationRequestMatcher = new AntPathRequestMatcher("/login", "POST");
-        captchaValidator = new SessionImageCaptchaValidator();
-    }
+  public static final String SPRING_SECURITY_FORM_VERIFY_CODE_KEY = "captcha";
+  protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
+  private String verifyCodeParameter = SPRING_SECURITY_FORM_VERIFY_CODE_KEY;
+  private RequestMatcher requiresAuthenticationRequestMatcher;
+  private ImageCaptchaValidator captchaValidator;
+  private AuthenticationFailureHandler failureHandler = new SimpleUrlAuthenticationFailureHandler();
 
-    public void setVerifyCodeParameter(String verifyCodeParameter) {
-        Assert.hasText(verifyCodeParameter, "verifyCode parameter must not be empty or null");
-        this.verifyCodeParameter = verifyCodeParameter;
-    }
+  public ImageCaptchaVerifyFilter() {
+    requiresAuthenticationRequestMatcher = new AntPathRequestMatcher("/login", "POST");
+    captchaValidator = new SessionImageCaptchaValidator();
+  }
 
-    public void setFailureHandler(
+  public void setVerifyCodeParameter(String verifyCodeParameter) {
+    Assert.hasText(verifyCodeParameter, "verifyCode parameter must not be empty or null");
+    this.verifyCodeParameter = verifyCodeParameter;
+  }
+
+  public void setFailureHandler(
       AuthenticationFailureHandler failureHandler) {
-        this.failureHandler = failureHandler;
-    }
+    this.failureHandler = failureHandler;
+  }
 
-    @Nullable
-    protected String obtainVerifyCode(HttpServletRequest request) {
-        return request.getParameter(verifyCodeParameter);
-    }
+  @Nullable
+  protected String obtainVerifyCode(HttpServletRequest request) {
+    return request.getParameter(verifyCodeParameter);
+  }
 
-    public void setCaptchaValidator(
+  public void setCaptchaValidator(
       ImageCaptchaValidator captchaValidator) {
-        this.captchaValidator = captchaValidator;
-    }
+    this.captchaValidator = captchaValidator;
+  }
 
-    public final void setRequiresAuthenticationRequestMatcher(
+  public final void setRequiresAuthenticationRequestMatcher(
       RequestMatcher requestMatcher) {
-        Assert.notNull(requestMatcher, "requestMatcher cannot be null");
-        this.requiresAuthenticationRequestMatcher = requestMatcher;
+    Assert.notNull(requestMatcher, "requestMatcher cannot be null");
+    this.requiresAuthenticationRequestMatcher = requestMatcher;
+  }
+
+  protected boolean requiresAuthentication(HttpServletRequest request,
+      HttpServletResponse response) {
+    return requiresAuthenticationRequestMatcher.matches(request);
+  }
+
+  @Override
+  public void doFilter(ServletRequest req, ServletResponse res,
+      FilterChain chain) throws IOException, ServletException {
+    HttpServletRequest request = (HttpServletRequest) req;
+    HttpServletResponse response = (HttpServletResponse) res;
+    if (!requiresAuthentication(request, response)) {
+      chain.doFilter(request, response);
+
+      return;
     }
-
-    protected boolean requiresAuthentication(HttpServletRequest request,
-                                             HttpServletResponse response) {
-        return requiresAuthenticationRequestMatcher.matches(request);
+    String verifyCode = obtainVerifyCode(request);
+    if (verifyCode == null) {
+      verifyCode = "";
     }
-
-    @Override
-    public void doFilter(ServletRequest req, ServletResponse res,
-                         FilterChain chain) throws IOException, ServletException {
-        HttpServletRequest request = (HttpServletRequest) req;
-        HttpServletResponse response = (HttpServletResponse) res;
-        if (!requiresAuthentication(request, response)) {
-            chain.doFilter(request, response);
-
-            return;
-        }
-        String verifyCode = obtainVerifyCode(request);
-        if (verifyCode == null) {
-            verifyCode = "";
-        }
-        try {
-            boolean verify = captchaValidator.valid(request, verifyCode);
-            if (!verify) {
-                throw new CaptchaAuthenticationException(messages.getMessage(
-                  "CaptchaUsernamePasswordAuthenticationFilter.verifyFailed",
-                  "验证码错误"));
-            }
-            chain.doFilter(request, response);
-        } catch (CaptchaAuthenticationException e) {
-            unsuccessfulAuthentication(request, response, e);
-        }
+    try {
+      boolean verify = captchaValidator.valid(request, verifyCode);
+      if (!verify) {
+        throw new CaptchaAuthenticationException(messages.getMessage(
+            "CaptchaUsernamePasswordAuthenticationFilter.verifyFailed",
+            "验证码错误"));
+      }
+      chain.doFilter(request, response);
+    } catch (CaptchaAuthenticationException e) {
+      unsuccessfulAuthentication(request, response, e);
     }
+  }
 
-    protected void unsuccessfulAuthentication(HttpServletRequest request,
-                                              HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-        SecurityContextHolder.clearContext();
+  protected void unsuccessfulAuthentication(HttpServletRequest request,
+      HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+    SecurityContextHolder.clearContext();
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Cleared security context due to exception", failed);
-        }
-        request.setAttribute(WebAttributes.AUTHENTICATION_EXCEPTION, failed);
-
-        if (failureHandler != null) {
-            failureHandler.onAuthenticationFailure(request, response, failed);
-        }
+    if (logger.isDebugEnabled()) {
+      logger.debug("Cleared security context due to exception", failed);
     }
+    request.setAttribute(WebAttributes.AUTHENTICATION_EXCEPTION, failed);
+
+    if (failureHandler != null) {
+      failureHandler.onAuthenticationFailure(request, response, failed);
+    }
+  }
 }

@@ -16,33 +16,32 @@
 
 package dev.niubi.commons.web.json.i18n;
 
+import java.util.Objects;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-
-import java.util.Objects;
 
 /**
  * @author chenzhenjia
  * @since 2020/4/12
  */
 public class DefaultMessageCodeFormatter implements ResponseMessageCodeFormatter {
-    private final MessageSource messageSource;
-    public static final String NOT_FOUND_MESSAGE = "AbstractResponseMsgFormatter.NotFound";
 
-    public DefaultMessageCodeFormatter(MessageSource messageSource) {
-        this.messageSource = messageSource;
+  public static final String NOT_FOUND_MESSAGE = "AbstractResponseMsgFormatter.NotFound";
+  private final MessageSource messageSource;
+
+  public DefaultMessageCodeFormatter(MessageSource messageSource) {
+    this.messageSource = messageSource;
+  }
+
+  @Override
+  public String getMsg(String msg) {
+    if (Objects.isNull(msg)) {
+      return null;
     }
-
-    @Override
-    public String getMsg(String msg) {
-        if (Objects.isNull(msg)) {
-            return null;
-        }
-        String message = messageSource.getMessage(msg, new Object[]{}, NOT_FOUND_MESSAGE, LocaleContextHolder.getLocale());
-        if (NOT_FOUND_MESSAGE.equals(message)) {
-            return msg;
-        }
-        return message;
+    String message = messageSource.getMessage(msg, new Object[] {}, NOT_FOUND_MESSAGE, LocaleContextHolder.getLocale());
+    if (NOT_FOUND_MESSAGE.equals(message)) {
+      return msg;
     }
-
+    return message;
+  }
 }

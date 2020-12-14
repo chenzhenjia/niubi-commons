@@ -25,12 +25,12 @@ import javax.servlet.http.HttpServletRequest;
  * @since 2020/6/14
  */
 public interface MobileCaptchaValidator {
-    /**
-     * 验证用户输入的手机验证码是否正确
-     *
-     * @param mobile 手机号
-     * @param code   用户输入的验证码
-     */
-    boolean valid(HttpServletRequest request, String mobile, String code);
 
+  /**
+   * 验证用户输入的手机验证码是否正确
+   *
+   * @param mobile 手机号
+   * @param code 用户输入的验证码
+   */
+  boolean valid(HttpServletRequest request, String mobile, String code);
 }

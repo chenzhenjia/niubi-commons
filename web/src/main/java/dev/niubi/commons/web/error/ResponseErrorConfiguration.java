@@ -17,7 +17,10 @@
 package dev.niubi.commons.web.error;
 
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException;
-
+import dev.niubi.commons.web.error.support.DefaultResponseErrorCustomizer;
+import dev.niubi.commons.web.json.i18n.ResponseMessageCodeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -32,12 +35,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import dev.niubi.commons.web.error.support.DefaultResponseErrorCustomizer;
-import dev.niubi.commons.web.json.i18n.ResponseMessageCodeFormatter;
-
 /**
  * @author chenzhenjia
  * @since 2019/11/21
@@ -45,55 +42,58 @@ import dev.niubi.commons.web.json.i18n.ResponseMessageCodeFormatter;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication
 public class ResponseErrorConfiguration {
+
+  private final ServerProperties serverProperties;
+  private final List<ErrorViewResolver> errorViewResolvers;
+
+  @Autowired
+  public ResponseErrorConfiguration(ServerProperties serverProperties,
+      ObjectProvider<ErrorViewResolver> errorViewResolvers) {
+    this.serverProperties = serverProperties;
+    this.errorViewResolvers = errorViewResolvers.stream().collect(Collectors.toList());
+  }
+
+  @Bean
+  public ResponseErrorController responseErrorController(ErrorAttributes errorAttributes,
+      ResponseErrorCustomizer responseErrorCustomizer) {
+    return new ResponseErrorController(errorAttributes, this.serverProperties.getError(),
+        this.errorViewResolvers, responseErrorCustomizer);
+  }
+
+  @Bean
+  @ConditionalOnMissingBean(ResponseErrorCustomizer.class)
+  public DefaultResponseErrorCustomizer defaultResponseErrorCustomizer() {
+    return new DefaultResponseErrorCustomizer();
+  }
+
+  @Bean
+  public ExceptionsHandler exceptionsHandler() {
+    return new ExceptionsHandler();
+  }
+
+  @Configuration
+  @Order
+  @ConditionalOnClass(WebSecurityConfigurerAdapter.class)
+  public static class ResponseErrorSecurityConfiguration extends WebSecurityConfigurerAdapter {
+
     private final ServerProperties serverProperties;
-    private final List<ErrorViewResolver> errorViewResolvers;
 
-    @Autowired
-    public ResponseErrorConfiguration(ServerProperties serverProperties,
-                                      ObjectProvider<ErrorViewResolver> errorViewResolvers) {
-        this.serverProperties = serverProperties;
-        this.errorViewResolvers = errorViewResolvers.stream().collect(Collectors.toList());
+    ResponseErrorSecurityConfiguration(ServerProperties serverProperties) {
+      this.serverProperties = serverProperties;
     }
+
+    public void configure(WebSecurity web) {
+      web.ignoring().antMatchers(serverProperties.getError().getPath());
+    }
+  }
+
+  @Configuration
+  @ConditionalOnClass(MissingKotlinParameterException.class)
+  public static class KotlinExceptionHandlerConfiguration {
 
     @Bean
-    public ResponseErrorController responseErrorController(ErrorAttributes errorAttributes,
-                                                           ResponseErrorCustomizer responseErrorCustomizer) {
-        return new ResponseErrorController(errorAttributes, this.serverProperties.getError(),
-          this.errorViewResolvers, responseErrorCustomizer);
+    public KotlinExceptionHandler kotlinExceptionHandler(ResponseMessageCodeFormatter responseMessageCodeFormatter) {
+      return new KotlinExceptionHandler(responseMessageCodeFormatter);
     }
-
-    @Bean
-    @ConditionalOnMissingBean(ResponseErrorCustomizer.class)
-    public DefaultResponseErrorCustomizer defaultResponseErrorCustomizer() {
-        return new DefaultResponseErrorCustomizer();
-    }
-
-    @Configuration
-    @Order
-    @ConditionalOnClass(WebSecurityConfigurerAdapter.class)
-    public static class ResponseErrorSecurityConfiguration extends WebSecurityConfigurerAdapter {
-        private final ServerProperties serverProperties;
-
-        ResponseErrorSecurityConfiguration(ServerProperties serverProperties) {
-            this.serverProperties = serverProperties;
-        }
-
-        public void configure(WebSecurity web) {
-            web.ignoring().antMatchers(serverProperties.getError().getPath());
-        }
-    }
-
-    @Bean
-    public ExceptionsHandler exceptionsHandler() {
-        return new ExceptionsHandler();
-    }
-
-    @Configuration
-    @ConditionalOnClass(MissingKotlinParameterException.class)
-    public static class KotlinExceptionHandlerConfiguration {
-        @Bean
-        public KotlinExceptionHandler kotlinExceptionHandler(ResponseMessageCodeFormatter responseMessageCodeFormatter) {
-            return new KotlinExceptionHandler(responseMessageCodeFormatter);
-        }
-    }
+  }
 }

@@ -22,6 +22,5 @@ package dev.niubi.commons.web.json.i18n;
  */
 public interface ResponseMessageCodeFormatter {
 
-    String getMsg(String msg);
-
+  String getMsg(String msg);
 }

@@ -16,10 +16,9 @@
 
 package dev.niubi.commons.security.permissions;
 
-import org.springframework.security.core.Authentication;
-
 import java.util.Objects;
 import java.util.function.Function;
+import org.springframework.security.core.Authentication;
 
 /**
  * 根据用户名加载权限数据
@@ -28,7 +27,6 @@ import java.util.function.Function;
  * &#64;Configuration
  * &#64;EnablePermissions
  * public class GlobalMethodConfiguration {
- *
  *      &#64;Bean
  *      public UsernamePermissionsVoter usernamePermissionsVoter(){
  *          return new UsernamePermissionsVoter(username -> {
@@ -37,29 +35,31 @@ import java.util.function.Function;
  *      }
  * }
  * </pre>
+ *
  * @author chenzhenjia
  * @since 2020/4/24
  */
 public class UsernamePermissionsVoter extends DefaultPermissionsVoter {
-    private Function<String, PermissionsContext> loadContext;
 
-    public UsernamePermissionsVoter() {
-    }
+  private Function<String, PermissionsContext> loadContext;
 
-    public UsernamePermissionsVoter(Function<String, PermissionsContext> loadContext) {
-        this.loadContext = loadContext;
-    }
+  public UsernamePermissionsVoter() {
+  }
 
-    public void setUsernamePermissionsLoader(Function<String, PermissionsContext> loadContext) {
-        this.loadContext = loadContext;
-    }
+  public UsernamePermissionsVoter(Function<String, PermissionsContext> loadContext) {
+    this.loadContext = loadContext;
+  }
 
-    @Override
-    protected PermissionsContext loadPermissions(Authentication authentication) {
-        String name = authentication.getName();
-        if (Objects.isNull(loadContext)) {
-            return new PermissionsContextImpl();
-        }
-        return loadContext.apply(name);
+  public void setUsernamePermissionsLoader(Function<String, PermissionsContext> loadContext) {
+    this.loadContext = loadContext;
+  }
+
+  @Override
+  protected PermissionsContext loadPermissions(Authentication authentication) {
+    String name = authentication.getName();
+    if (Objects.isNull(loadContext)) {
+      return new PermissionsContextImpl();
     }
+    return loadContext.apply(name);
+  }
 }

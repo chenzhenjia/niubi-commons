@@ -16,11 +16,10 @@
 
 package dev.niubi.commons.security.permissions;
 
-import org.springframework.security.core.Authentication;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.security.core.Authentication;
 
 /**
  * 默认空的权限投票器，投票方法使用对比一致和startsWith来判断权限
@@ -30,22 +29,21 @@ import java.util.Optional;
  */
 public class DefaultPermissionsVoter extends AbstractPermissionsVoter {
 
-    @Override
-    protected PermissionsContext loadPermissions(Authentication authentication) {
-        return new PermissionsContextImpl(Collections.emptySet());
-    }
+  @Override
+  protected PermissionsContext loadPermissions(Authentication authentication) {
+    return new PermissionsContextImpl(Collections.emptySet());
+  }
 
-    @Override
-    protected boolean vote(PermissionsContext context, List<String> attrs) {
-        return Optional.ofNullable(context.getPermissions()).orElse(Collections.emptySet())
-          .stream()
-          .anyMatch(permission -> {
-              if ("**".equals(permission)) {
-                  return true;
-              }
-              return attrs.stream()
-                .anyMatch(attr -> permission.equals(attr) || attr.startsWith(permission));
-          });
-    }
-
+  @Override
+  protected boolean vote(PermissionsContext context, List<String> attrs) {
+    return Optional.ofNullable(context.getPermissions()).orElse(Collections.emptySet())
+        .stream()
+        .anyMatch(permission -> {
+          if ("**".equals(permission)) {
+            return true;
+          }
+          return attrs.stream()
+              .anyMatch(attr -> permission.equals(attr) || attr.startsWith(permission));
+        });
+  }
 }

@@ -16,12 +16,11 @@
 
 package dev.niubi.commons.security.permissions;
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * 是否启用权限管理
@@ -30,7 +29,6 @@ import java.lang.annotation.Target;
  * &#64;Configuration
  * &#64;EnablePermissions
  * public class GlobalMethodConfiguration {
- *
  *      &#64;Bean
  *      public UsernamePermissionsVoter usernamePermissionsVoter(){
  *          return new UsernamePermissionsVoter(username -> {
@@ -44,9 +42,10 @@ import java.lang.annotation.Target;
  * @since 2020/4/23
  */
 @Retention(value = java.lang.annotation.RetentionPolicy.RUNTIME)
-@Target(value = { java.lang.annotation.ElementType.TYPE })
+@Target(value = {java.lang.annotation.ElementType.TYPE})
 @Documented
 @Import({PermissionsMethodSecurityConfiguration.class})
 @Configuration
 public @interface EnablePermissions {
+
 }

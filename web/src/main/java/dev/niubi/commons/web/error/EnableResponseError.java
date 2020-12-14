@@ -16,14 +16,13 @@
 
 package dev.niubi.commons.web.error;
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * 启用自定义的json 错误处理
@@ -37,4 +36,5 @@ import java.lang.annotation.Target;
 @Import({ResponseErrorConfiguration.class})
 @Configuration(proxyBeanMethods = false)
 public @interface EnableResponseError {
+
 }

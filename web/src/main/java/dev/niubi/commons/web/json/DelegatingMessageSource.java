@@ -16,49 +16,49 @@
 
 package dev.niubi.commons.web.json;
 
+import java.util.Locale;
+import java.util.Optional;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
-
-import java.util.Locale;
-import java.util.Optional;
 
 /**
  * @author chenzhenjia
  * @since 2020/3/31
  */
 public class DelegatingMessageSource implements MessageSource {
-    private MessageSource primaryMessageSource;
-    private final MessageSource secondMessageSource;
 
-    public DelegatingMessageSource(MessageSource secondMessageSource) {
-        this.secondMessageSource = secondMessageSource;
-    }
+  private final MessageSource secondMessageSource;
+  private MessageSource primaryMessageSource;
 
-    public void setPrimaryMessageSource(MessageSource primaryMessageSource) {
-        this.primaryMessageSource = primaryMessageSource;
-    }
+  public DelegatingMessageSource(MessageSource secondMessageSource) {
+    this.secondMessageSource = secondMessageSource;
+  }
 
-    @Override
-    public String getMessage(String code, Object[] args, String defaultMessage, Locale locale) {
-        return Optional.ofNullable(primaryMessageSource)
-          .map(messageSource -> messageSource.getMessage(code, args, null, locale))
-          .filter(s -> !s.equals(code))
-          .orElseGet(() -> secondMessageSource.getMessage(code, args, defaultMessage, locale));
-    }
+  public void setPrimaryMessageSource(MessageSource primaryMessageSource) {
+    this.primaryMessageSource = primaryMessageSource;
+  }
 
-    @Override
-    public String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException {
-        return Optional.ofNullable(primaryMessageSource)
-          .map(messageSource -> messageSource.getMessage(code, args, null, locale))
-          .filter(s -> !s.equals(code))
-          .orElseGet(() -> secondMessageSource.getMessage(code, args, "", locale));
-    }
+  @Override
+  public String getMessage(String code, Object[] args, String defaultMessage, Locale locale) {
+    return Optional.ofNullable(primaryMessageSource)
+        .map(messageSource -> messageSource.getMessage(code, args, null, locale))
+        .filter(s -> !s.equals(code))
+        .orElseGet(() -> secondMessageSource.getMessage(code, args, defaultMessage, locale));
+  }
 
-    @Override
-    public String getMessage(MessageSourceResolvable resolvable, Locale locale) throws NoSuchMessageException {
-        return Optional.ofNullable(primaryMessageSource)
-          .map(messageSource -> messageSource.getMessage(resolvable, locale))
-          .orElseGet(() -> secondMessageSource.getMessage(resolvable, locale));
-    }
+  @Override
+  public String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException {
+    return Optional.ofNullable(primaryMessageSource)
+        .map(messageSource -> messageSource.getMessage(code, args, null, locale))
+        .filter(s -> !s.equals(code))
+        .orElseGet(() -> secondMessageSource.getMessage(code, args, "", locale));
+  }
+
+  @Override
+  public String getMessage(MessageSourceResolvable resolvable, Locale locale) throws NoSuchMessageException {
+    return Optional.ofNullable(primaryMessageSource)
+        .map(messageSource -> messageSource.getMessage(resolvable, locale))
+        .orElseGet(() -> secondMessageSource.getMessage(resolvable, locale));
+  }
 }

@@ -17,7 +17,8 @@
 package dev.niubi.commons.web.json;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import dev.niubi.commons.web.json.i18n.DefaultMessageCodeFormatter;
+import dev.niubi.commons.web.json.i18n.ResponseMessageCodeFormatter;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -30,9 +31,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-import dev.niubi.commons.web.json.i18n.DefaultMessageCodeFormatter;
-import dev.niubi.commons.web.json.i18n.ResponseMessageCodeFormatter;
-
 /**
  * @author chenzhenjia
  * @since 2020/3/25
@@ -41,36 +39,36 @@ import dev.niubi.commons.web.json.i18n.ResponseMessageCodeFormatter;
 @ConditionalOnClass({ResponseBodyAdvice.class, ObjectMapper.class})
 public class ResponseConfiguration {
 
-    @Bean
-    @Lazy(false)
-    public ResponseCustomizeAdvice responseAdvice(ObjectProvider<ResponseCustomizer> responseCustomizers,
-                                                  ResponseMessageCodeFormatter messageCodeFormatter) {
-        return new ResponseCustomizeAdvice(responseCustomizers.getIfAvailable(() -> ResponseCustomizer.DEFAULT), messageCodeFormatter);
-    }
+  @Bean
+  @Lazy(false)
+  public ResponseCustomizeAdvice responseAdvice(ObjectProvider<ResponseCustomizer> responseCustomizers,
+      ResponseMessageCodeFormatter messageCodeFormatter) {
+    return new ResponseCustomizeAdvice(responseCustomizers.getIfAvailable(() -> ResponseCustomizer.DEFAULT),
+        messageCodeFormatter);
+  }
 
-    protected MessageSource messageSource() {
-        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-        messageSource.setBasename("niubi_messages");
-        messageSource.setDefaultEncoding("UTF-8");
-        messageSource.setFallbackToSystemLocale(true);
-        return messageSource;
-    }
+  protected MessageSource messageSource() {
+    ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+    messageSource.setBasename("niubi_messages");
+    messageSource.setDefaultEncoding("UTF-8");
+    messageSource.setFallbackToSystemLocale(true);
+    return messageSource;
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public ResponseMessageCodeFormatter responseMessageCodeFormatter(ObjectProvider<MessageSource> messageSource) {
+  @Bean
+  @ConditionalOnMissingBean
+  public ResponseMessageCodeFormatter responseMessageCodeFormatter(ObjectProvider<MessageSource> messageSource) {
 
-        DelegatingMessageSource delegatingMessageSource = new DelegatingMessageSource(messageSource());
-        delegatingMessageSource.setPrimaryMessageSource(messageSource.getIfAvailable());
+    DelegatingMessageSource delegatingMessageSource = new DelegatingMessageSource(messageSource());
+    delegatingMessageSource.setPrimaryMessageSource(messageSource.getIfAvailable());
 
-        return new DefaultMessageCodeFormatter(delegatingMessageSource);
-    }
+    return new DefaultMessageCodeFormatter(delegatingMessageSource);
+  }
 
-    @Bean
-    public ApplicationListener<ContextRefreshedEvent> responseContextInitFinishListener(ObjectMapper objectMapper) {
-        return event -> {
-            Response.setObjectMapper(objectMapper);
-        };
-    }
-
+  @Bean
+  public ApplicationListener<ContextRefreshedEvent> responseContextInitFinishListener(ObjectMapper objectMapper) {
+    return event -> {
+      Response.setObjectMapper(objectMapper);
+    };
+  }
 }

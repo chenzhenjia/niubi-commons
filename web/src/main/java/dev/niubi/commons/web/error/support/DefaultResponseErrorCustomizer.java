@@ -16,14 +16,12 @@
 
 package dev.niubi.commons.web.error.support;
 
-import org.apache.commons.collections.MapUtils;
-import org.springframework.http.HttpStatus;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import dev.niubi.commons.web.error.ResponseErrorCustomizer;
 import dev.niubi.commons.web.json.Response;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.commons.collections.MapUtils;
+import org.springframework.http.HttpStatus;
 
 /**
  * 默认的错误消息返回实现
@@ -32,16 +30,17 @@ import dev.niubi.commons.web.json.Response;
  * @since 2019/12/11
  */
 public class DefaultResponseErrorCustomizer implements ResponseErrorCustomizer {
-    @Override
-    public Map<String, Object> customize(Map<String, Object> errorAttributes) {
-        Integer statusCode = MapUtils.getInteger(errorAttributes, "status");
-        String error = MapUtils.getString(errorAttributes, "error");
-        String message = MapUtils.getString(errorAttributes, "message");
-        String path = MapUtils.getString(errorAttributes, "path");
-        HashMap<String, Object> map = Response.business(error)
-          .status(HttpStatus.valueOf(statusCode)).build().toMap();
-        map.put("path", path);
-        map.put("error", message);
-        return map;
-    }
+
+  @Override
+  public Map<String, Object> customize(Map<String, Object> errorAttributes) {
+    Integer statusCode = MapUtils.getInteger(errorAttributes, "status");
+    String error = MapUtils.getString(errorAttributes, "error");
+    String message = MapUtils.getString(errorAttributes, "message");
+    String path = MapUtils.getString(errorAttributes, "path");
+    HashMap<String, Object> map = Response.business(error)
+        .status(HttpStatus.valueOf(statusCode)).build().toMap();
+    map.put("path", path);
+    map.put("error", message);
+    return map;
+  }
 }

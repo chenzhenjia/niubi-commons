@@ -16,6 +16,7 @@
 
 package dev.niubi.commons.security.captcha.mobile;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
@@ -36,167 +37,166 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.core.userdetails.cache.NullUserCache;
 import org.springframework.util.Assert;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * @author chenzhenjia
  * @since 2020/6/12
  */
 @Slf4j
 public class MobileCaptchaAuthenticationProvider implements
-  AuthenticationProvider, InitializingBean, MessageSourceAware {
-    protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
-    private UserCache userCache = new NullUserCache();
-    private boolean forcePrincipalAsString = false;
-    private UserDetailsChecker preAuthenticationChecks = new AccountStatusUserDetailsChecker();
-    private UserDetailsChecker postAuthenticationChecks = new DefaultPostAuthenticationChecks();
-    private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
-    private MobileUserDetailsService userDetailsService;
+    AuthenticationProvider, InitializingBean, MessageSourceAware {
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        Assert.notNull(this.userDetailsService, "A MobileUserDetailsService must be set");
-    }
+  protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
+  private UserCache userCache = new NullUserCache();
+  private boolean forcePrincipalAsString = false;
+  private UserDetailsChecker preAuthenticationChecks = new AccountStatusUserDetailsChecker();
+  private UserDetailsChecker postAuthenticationChecks = new DefaultPostAuthenticationChecks();
+  private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
+  private MobileUserDetailsService userDetailsService;
 
-    public void setUserDetailsService(
+  @Override
+  public void afterPropertiesSet() throws Exception {
+    Assert.notNull(this.userDetailsService, "A MobileUserDetailsService must be set");
+  }
+
+  public void setUserDetailsService(
       MobileUserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
-    }
+    this.userDetailsService = userDetailsService;
+  }
 
-    @Override
-    public void setMessageSource(MessageSource messageSource) {
-        this.messages = new MessageSourceAccessor(messageSource);
-    }
+  @Override
+  public void setMessageSource(MessageSource messageSource) {
+    this.messages = new MessageSourceAccessor(messageSource);
+  }
 
-    public UserDetailsChecker getPostAuthenticationChecks() {
-        return postAuthenticationChecks;
-    }
+  public UserDetailsChecker getPostAuthenticationChecks() {
+    return postAuthenticationChecks;
+  }
 
-    public void setPostAuthenticationChecks(
+  public void setPostAuthenticationChecks(
       UserDetailsChecker postAuthenticationChecks) {
-        this.postAuthenticationChecks = postAuthenticationChecks;
-    }
+    this.postAuthenticationChecks = postAuthenticationChecks;
+  }
 
-    public UserCache getUserCache() {
-        return userCache;
-    }
+  public UserCache getUserCache() {
+    return userCache;
+  }
 
-    public boolean isForcePrincipalAsString() {
-        return forcePrincipalAsString;
-    }
+  public void setUserCache(UserCache userCache) {
+    this.userCache = userCache;
+  }
 
-    public void setForcePrincipalAsString(boolean forcePrincipalAsString) {
-        this.forcePrincipalAsString = forcePrincipalAsString;
-    }
+  public boolean isForcePrincipalAsString() {
+    return forcePrincipalAsString;
+  }
 
+  public void setForcePrincipalAsString(boolean forcePrincipalAsString) {
+    this.forcePrincipalAsString = forcePrincipalAsString;
+  }
 
-    public void setUserCache(UserCache userCache) {
-        this.userCache = userCache;
-    }
-
-    public void setAuthoritiesMapper(
+  public void setAuthoritiesMapper(
       GrantedAuthoritiesMapper authoritiesMapper) {
-        this.authoritiesMapper = authoritiesMapper;
-    }
+    this.authoritiesMapper = authoritiesMapper;
+  }
 
-    public void setPreAuthenticationChecks(
+  public void setPreAuthenticationChecks(
       UserDetailsChecker preAuthenticationChecks) {
-        this.preAuthenticationChecks = preAuthenticationChecks;
-    }
+    this.preAuthenticationChecks = preAuthenticationChecks;
+  }
 
-    @Override
-    public Authentication authenticate(
+  @Override
+  public Authentication authenticate(
       Authentication authentication) throws AuthenticationException {
-        Assert.isInstanceOf(MobileCaptchaAuthenticationToken.class, authentication,
-          () -> messages.getMessage(
+    Assert.isInstanceOf(MobileCaptchaAuthenticationToken.class, authentication,
+        () -> messages.getMessage(
             "MobileCodeAuthenticationProvider.onlySupports",
             "仅支持MobileCodeAuthenticationToken"));
 
-        MobileCaptchaAuthenticationToken mobileCodeAuthentication =
-          (MobileCaptchaAuthenticationToken) authentication;
-        String mobile = (authentication.getPrincipal() == null) ? "NONE_PROVIDED"
-          : authentication.getName();
+    MobileCaptchaAuthenticationToken mobileCodeAuthentication =
+        (MobileCaptchaAuthenticationToken) authentication;
+    String mobile = (authentication.getPrincipal() == null) ? "NONE_PROVIDED"
+        : authentication.getName();
 
-        UserDetails user = this.userCache.getUserFromCache(mobile);
+    UserDetails user = this.userCache.getUserFromCache(mobile);
 
-        boolean cacheWasUsed = true;
-        if (user == null) {
-            cacheWasUsed = false;
+    boolean cacheWasUsed = true;
+    if (user == null) {
+      cacheWasUsed = false;
 
-            try {
-                user = retrieveUser(mobile, mobileCodeAuthentication);
-            } catch (UsernameNotFoundException notFound) {
-                log.debug("mobile '" + mobile + "' not found");
+      try {
+        user = retrieveUser(mobile, mobileCodeAuthentication);
+      } catch (UsernameNotFoundException notFound) {
+        log.debug("mobile '" + mobile + "' not found");
 
-                throw notFound;
-            } catch (Exception ex) {
-                throw new InternalAuthenticationServiceException(ex.getMessage(), ex);
-            }
-            Assert.notNull(user,
-              "retrieveUser returned null - a violation of the interface contract");
-        }
-        try {
-            preAuthenticationChecks.check(user);
-        } catch (AuthenticationException exception) {
-            if (cacheWasUsed) {
-                // There was a problem, so try again after checking
-                // we're using latest data (i.e. not from the cache)
-                cacheWasUsed = false;
-                user = retrieveUser(mobile, mobileCodeAuthentication);
-                preAuthenticationChecks.check(user);
-            } else {
-                throw exception;
-            }
-        }
-        postAuthenticationChecks.check(user);
+        throw notFound;
+      } catch (Exception ex) {
+        throw new InternalAuthenticationServiceException(ex.getMessage(), ex);
+      }
+      Assert.notNull(user,
+          "retrieveUser returned null - a violation of the interface contract");
+    }
+    try {
+      preAuthenticationChecks.check(user);
+    } catch (AuthenticationException exception) {
+      if (cacheWasUsed) {
+        // There was a problem, so try again after checking
+        // we're using latest data (i.e. not from the cache)
+        cacheWasUsed = false;
+        user = retrieveUser(mobile, mobileCodeAuthentication);
+        preAuthenticationChecks.check(user);
+      } else {
+        throw exception;
+      }
+    }
+    postAuthenticationChecks.check(user);
 
-        if (!cacheWasUsed) {
-            this.userCache.putUserInCache(user);
-        }
-
-        Object principalToReturn = user;
-
-        if (forcePrincipalAsString) {
-            principalToReturn = user.getUsername();
-        }
-
-        return createSuccessAuthentication(principalToReturn, mobileCodeAuthentication, user);
+    if (!cacheWasUsed) {
+      this.userCache.putUserInCache(user);
     }
 
-    protected Authentication createSuccessAuthentication(Object principal,
-                                                         MobileCaptchaAuthenticationToken authentication, UserDetails user) {
-        MobileCaptchaAuthenticationToken result = new MobileCaptchaAuthenticationToken(
-          principal, authentication.getCode(),
-          authoritiesMapper.mapAuthorities(user.getAuthorities()));
-        result.setDetails(authentication.getDetails());
+    Object principalToReturn = user;
 
-        return result;
+    if (forcePrincipalAsString) {
+      principalToReturn = user.getUsername();
     }
 
-    public UserDetails retrieveUser(String mobile, MobileCaptchaAuthenticationToken authentication) {
-        UserDetails user = this.userDetailsService.loadUserByMobile(mobile);
-        if (user == null) {
-            throw new InternalAuthenticationServiceException(
-              "UserDetailsService returned null, which is an interface contract violation");
-        }
-        return user;
-    }
+    return createSuccessAuthentication(principalToReturn, mobileCodeAuthentication, user);
+  }
 
-    @Override
-    public boolean supports(Class<?> authentication) {
-        return (MobileCaptchaAuthenticationToken.class
-          .isAssignableFrom(authentication));
-    }
+  protected Authentication createSuccessAuthentication(Object principal,
+      MobileCaptchaAuthenticationToken authentication, UserDetails user) {
+    MobileCaptchaAuthenticationToken result = new MobileCaptchaAuthenticationToken(
+        principal, authentication.getCode(),
+        authoritiesMapper.mapAuthorities(user.getAuthorities()));
+    result.setDetails(authentication.getDetails());
 
-    private class DefaultPostAuthenticationChecks implements UserDetailsChecker {
-        public void check(UserDetails user) {
-            if (!user.isCredentialsNonExpired()) {
-                log.debug("User account credentials have expired");
+    return result;
+  }
 
-                throw new CredentialsExpiredException(messages.getMessage(
-                  "AbstractUserDetailsAuthenticationProvider.credentialsExpired",
-                  "User credentials have expired"));
-            }
-        }
+  public UserDetails retrieveUser(String mobile, MobileCaptchaAuthenticationToken authentication) {
+    UserDetails user = this.userDetailsService.loadUserByMobile(mobile);
+    if (user == null) {
+      throw new InternalAuthenticationServiceException(
+          "UserDetailsService returned null, which is an interface contract violation");
     }
+    return user;
+  }
+
+  @Override
+  public boolean supports(Class<?> authentication) {
+    return (MobileCaptchaAuthenticationToken.class
+        .isAssignableFrom(authentication));
+  }
+
+  private class DefaultPostAuthenticationChecks implements UserDetailsChecker {
+
+    public void check(UserDetails user) {
+      if (!user.isCredentialsNonExpired()) {
+        log.debug("User account credentials have expired");
+
+        throw new CredentialsExpiredException(messages.getMessage(
+            "AbstractUserDetailsAuthenticationProvider.credentialsExpired",
+            "User credentials have expired"));
+      }
+    }
+  }
 }

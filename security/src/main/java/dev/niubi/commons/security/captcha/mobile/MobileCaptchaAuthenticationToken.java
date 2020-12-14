@@ -16,45 +16,45 @@
 
 package dev.niubi.commons.security.captcha.mobile;
 
+import java.util.Collection;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
-
-import java.util.Collection;
 
 /**
  * @author chenzhenjia
  * @since 2020/6/12
  */
 public class MobileCaptchaAuthenticationToken extends AbstractAuthenticationToken {
-    private final Object principal;
-    private final String code;
 
-    public MobileCaptchaAuthenticationToken(Object principal, String code) {
-        super(null);
-        this.principal = principal;
-        this.code = code;
-        setAuthenticated(false);
-    }
+  private final Object principal;
+  private final String code;
 
-    public MobileCaptchaAuthenticationToken(Object principal, String code,
-                                            Collection<? extends GrantedAuthority> authorities) {
-        super(authorities);
-        this.principal = principal;
-        this.code = code;
-        super.setAuthenticated(true); // must use super, as we override
-    }
+  public MobileCaptchaAuthenticationToken(Object principal, String code) {
+    super(null);
+    this.principal = principal;
+    this.code = code;
+    setAuthenticated(false);
+  }
 
-    public String getCode() {
-        return code;
-    }
+  public MobileCaptchaAuthenticationToken(Object principal, String code,
+      Collection<? extends GrantedAuthority> authorities) {
+    super(authorities);
+    this.principal = principal;
+    this.code = code;
+    super.setAuthenticated(true); // must use super, as we override
+  }
 
-    @Override
-    public Object getCredentials() {
-        return "A/N";
-    }
+  public String getCode() {
+    return code;
+  }
 
-    @Override
-    public Object getPrincipal() {
-        return principal;
-    }
+  @Override
+  public Object getCredentials() {
+    return "A/N";
+  }
+
+  @Override
+  public Object getPrincipal() {
+    return principal;
+  }
 }

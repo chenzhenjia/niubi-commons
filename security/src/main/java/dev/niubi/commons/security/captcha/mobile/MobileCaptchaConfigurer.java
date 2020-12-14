@@ -27,52 +27,52 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
  * @since 2020/6/12
  */
 public class MobileCaptchaConfigurer<H extends HttpSecurityBuilder<H>> extends
-  AbstractAuthenticationFilterConfigurer<H, MobileCaptchaConfigurer<H>, MobileCaptchaAuthenticationFilter> {
-    MobileCaptchaAuthenticationProvider mobileCaptchaAuthenticationProvider = new MobileCaptchaAuthenticationProvider();
+    AbstractAuthenticationFilterConfigurer<H, MobileCaptchaConfigurer<H>, MobileCaptchaAuthenticationFilter> {
 
-    public MobileCaptchaConfigurer() {
-        super(new MobileCaptchaAuthenticationFilter(), "/mobile");
-        mobileParameter("mobile");
-        codeParameter("code");
-    }
+  MobileCaptchaAuthenticationProvider mobileCaptchaAuthenticationProvider = new MobileCaptchaAuthenticationProvider();
 
-    // @Override
-    // public void init(H http) throws Exception {
-    //     super.init(http);
-    // }
+  public MobileCaptchaConfigurer() {
+    super(new MobileCaptchaAuthenticationFilter(), "/mobile");
+    mobileParameter("mobile");
+    codeParameter("code");
+  }
 
-    @Override
-    public void configure(H http) throws Exception {
-        http.addFilterBefore(getAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-        http.authenticationProvider(this.postProcess(mobileCaptchaAuthenticationProvider));
+  // @Override
+  // public void init(H http) throws Exception {
+  //     super.init(http);
+  // }
 
-        super.configure(http);
-    }
+  @Override
+  public void configure(H http) throws Exception {
+    http.addFilterBefore(getAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+    http.authenticationProvider(this.postProcess(mobileCaptchaAuthenticationProvider));
 
-    @Override
-    protected RequestMatcher createLoginProcessingUrlMatcher(
+    super.configure(http);
+  }
+
+  @Override
+  protected RequestMatcher createLoginProcessingUrlMatcher(
       String loginProcessingUrl) {
-        return new AntPathRequestMatcher(loginProcessingUrl, "POST");
-    }
+    return new AntPathRequestMatcher(loginProcessingUrl, "POST");
+  }
 
-    public MobileCaptchaConfigurer<H> mobileParameter(String mobileParameter) {
-        getAuthenticationFilter().setMobileParameter(mobileParameter);
-        return this;
-    }
+  public MobileCaptchaConfigurer<H> mobileParameter(String mobileParameter) {
+    getAuthenticationFilter().setMobileParameter(mobileParameter);
+    return this;
+  }
 
-    public MobileCaptchaConfigurer<H> codeParameter(String codeParameter) {
-        getAuthenticationFilter().setCodeParameter(codeParameter);
-        return this;
-    }
+  public MobileCaptchaConfigurer<H> codeParameter(String codeParameter) {
+    getAuthenticationFilter().setCodeParameter(codeParameter);
+    return this;
+  }
 
-    public MobileCaptchaConfigurer<H> captchaValidator(MobileCaptchaValidator captchaValidator) {
-        getAuthenticationFilter().setCaptchaValidator(captchaValidator);
-        return this;
-    }
+  public MobileCaptchaConfigurer<H> captchaValidator(MobileCaptchaValidator captchaValidator) {
+    getAuthenticationFilter().setCaptchaValidator(captchaValidator);
+    return this;
+  }
 
-    public MobileCaptchaConfigurer<H> userDetailsService(MobileUserDetailsService userDetailsService) {
-        mobileCaptchaAuthenticationProvider.setUserDetailsService(userDetailsService);
-        return this;
-    }
-
+  public MobileCaptchaConfigurer<H> userDetailsService(MobileUserDetailsService userDetailsService) {
+    mobileCaptchaAuthenticationProvider.setUserDetailsService(userDetailsService);
+    return this;
+  }
 }

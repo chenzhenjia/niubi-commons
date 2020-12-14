@@ -16,52 +16,52 @@
 
 package dev.niubi.commons.web.error.exception;
 
-import org.springframework.http.HttpStatus;
-
 import dev.niubi.commons.web.json.Response;
+import org.springframework.http.HttpStatus;
 
 /**
  * @author chenzhenjia
  * @since 2020/1/29
  */
 public class BusinessException extends RuntimeException {
-    private String code = Response.Codes.BUSINESS;
-    private HttpStatus status;
 
-    public BusinessException() {
-        super("未知错误");
-    }
+  private String code = Response.Codes.BUSINESS;
+  private HttpStatus status;
 
-    public BusinessException(Response<?> response) {
-        this(response.getMsg(), response.getCode(), HttpStatus.valueOf(response.getStatus()));
-    }
+  public BusinessException() {
+    super("未知错误");
+  }
 
-    public BusinessException(String message, String code) {
-        this(message, code, null);
-    }
+  public BusinessException(Response<?> response) {
+    this(response.getMsg(), response.getCode(), HttpStatus.valueOf(response.getStatus()));
+  }
 
-    public BusinessException(String message, String code,
-                             HttpStatus status) {
-        super(message);
-        this.code = code;
-        this.status = status;
-    }
+  public BusinessException(String message, String code) {
+    this(message, code, null);
+  }
 
-    public BusinessException(String message,
-                             HttpStatus status) {
-        super(message);
-        this.status = status;
-    }
+  public BusinessException(String message, String code,
+      HttpStatus status) {
+    super(message);
+    this.code = code;
+    this.status = status;
+  }
 
-    public BusinessException(String message) {
-        super(message);
-    }
+  public BusinessException(String message,
+      HttpStatus status) {
+    super(message);
+    this.status = status;
+  }
 
-    public HttpStatus getStatus() {
-        return status;
-    }
+  public BusinessException(String message) {
+    super(message);
+  }
 
-    public String getCode() {
-        return code;
-    }
+  public HttpStatus getStatus() {
+    return status;
+  }
+
+  public String getCode() {
+    return code;
+  }
 }

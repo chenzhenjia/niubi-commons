@@ -26,23 +26,24 @@ import java.util.Set;
  * @since 2020/4/23
  */
 public class PermissionsContextImpl implements PermissionsContext {
-    private Set<String> permissions;
 
-    public PermissionsContextImpl() {
-        this.permissions = Collections.emptySet();
-    }
+  private Set<String> permissions;
 
-    public PermissionsContextImpl(Set<String> permissions) {
-        this.permissions = permissions;
-    }
+  public PermissionsContextImpl() {
+    this.permissions = Collections.emptySet();
+  }
 
-    @Override
-    public Set<String> getPermissions() {
-        return permissions;
-    }
+  public PermissionsContextImpl(Set<String> permissions) {
+    this.permissions = permissions;
+  }
 
-    @Override
-    public void setPermissions(Set<String> permissions) {
-        this.permissions = permissions;
-    }
+  @Override
+  public Set<String> getPermissions() {
+    return permissions;
+  }
+
+  @Override
+  public void setPermissions(Set<String> permissions) {
+    this.permissions = permissions;
+  }
 }

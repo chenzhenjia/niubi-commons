@@ -16,6 +16,11 @@
 
 package dev.niubi.commons.web.json;
 
+import dev.niubi.commons.web.json.i18n.ResponseMessageCodeFormatter;
+import java.lang.reflect.Method;
+import java.util.Date;
+import java.util.Objects;
+import java.util.Optional;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -25,13 +30,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-import java.lang.reflect.Method;
-import java.util.Date;
-import java.util.Objects;
-import java.util.Optional;
-
-import dev.niubi.commons.web.json.i18n.ResponseMessageCodeFormatter;
-
 /**
  * @author chenzhenjia
  * @since 2019/12/11
@@ -39,36 +37,40 @@ import dev.niubi.commons.web.json.i18n.ResponseMessageCodeFormatter;
 @ControllerAdvice
 @RestControllerAdvice
 public class ResponseCustomizeAdvice implements ResponseBodyAdvice<Object> {
-    private final ResponseCustomizer responseCustomizer;
-    private final ResponseMessageCodeFormatter messageCodeFormatter;
 
-    public ResponseCustomizeAdvice(ResponseCustomizer responseCustomizer, ResponseMessageCodeFormatter messageCodeFormatter) {
-        this.responseCustomizer = responseCustomizer;
-        this.messageCodeFormatter = messageCodeFormatter;
-    }
+  private final ResponseCustomizer responseCustomizer;
+  private final ResponseMessageCodeFormatter messageCodeFormatter;
 
-    @Override
-    public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-        return Optional.ofNullable(returnType.getMethod())
-          .map(Method::getReturnType)
-          .map(c -> c.isAssignableFrom(Response.class))
-          .orElse(false);
-    }
+  public ResponseCustomizeAdvice(ResponseCustomizer responseCustomizer,
+      ResponseMessageCodeFormatter messageCodeFormatter) {
+    this.responseCustomizer = responseCustomizer;
+    this.messageCodeFormatter = messageCodeFormatter;
+  }
 
-    @Override
-    public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
-        if (Objects.nonNull(body) && body instanceof Response) {
-            Response<?> responseBody = (Response<?>) body;
-            if (responseBody instanceof SpringMvcResponse) {
-                SpringMvcResponse<?> springMvcResponse = (SpringMvcResponse<?>) responseBody;
-                response.setStatusCode(springMvcResponse.getHttpStatus());
-                springMvcResponse.setTimestamp(new Date());
-                if (springMvcResponse.isI18n()) {
-                    responseBody.setMsg(messageCodeFormatter.getMsg(responseBody.getMsg()));
-                }
-            }
-            return responseCustomizer.customize(responseBody);
+  @Override
+  public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+    return Optional.ofNullable(returnType.getMethod())
+        .map(Method::getReturnType)
+        .map(c -> c.isAssignableFrom(Response.class))
+        .orElse(false);
+  }
+
+  @Override
+  public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType,
+      Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request,
+      ServerHttpResponse response) {
+    if (Objects.nonNull(body) && body instanceof Response) {
+      Response<?> responseBody = (Response<?>) body;
+      if (responseBody instanceof SpringMvcResponse) {
+        SpringMvcResponse<?> springMvcResponse = (SpringMvcResponse<?>) responseBody;
+        response.setStatusCode(springMvcResponse.getHttpStatus());
+        springMvcResponse.setTimestamp(new Date());
+        if (springMvcResponse.isI18n()) {
+          responseBody.setMsg(messageCodeFormatter.getMsg(responseBody.getMsg()));
         }
-        return body;
+      }
+      return responseCustomizer.customize(responseBody);
     }
+    return body;
+  }
 }
