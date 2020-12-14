@@ -33,7 +33,7 @@ public class BusinessException extends RuntimeException {
     }
 
     public BusinessException(Response<?> response) {
-        this(response.getMsg(), response.getCode(), response.getHttpStatus());
+        this(response.getMsg(), response.getCode(), HttpStatus.valueOf(response.getStatus()));
     }
 
     public BusinessException(String message, String code) {

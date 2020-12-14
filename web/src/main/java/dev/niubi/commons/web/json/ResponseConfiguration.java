@@ -45,7 +45,7 @@ public class ResponseConfiguration {
     @Lazy(false)
     public ResponseCustomizeAdvice responseAdvice(ObjectProvider<ResponseCustomizer> responseCustomizers,
                                                   ResponseMessageCodeFormatter messageCodeFormatter) {
-        return new ResponseCustomizeAdvice(responseCustomizers.getIfAvailable(() -> response -> response), messageCodeFormatter);
+        return new ResponseCustomizeAdvice(responseCustomizers.getIfAvailable(() -> ResponseCustomizer.DEFAULT), messageCodeFormatter);
     }
 
     protected MessageSource messageSource() {

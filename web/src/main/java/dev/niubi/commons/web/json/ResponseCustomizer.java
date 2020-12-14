@@ -21,6 +21,7 @@ package dev.niubi.commons.web.json;
  * @since 2019/12/11
  */
 public interface ResponseCustomizer {
+    ResponseCustomizer DEFAULT= response -> response;
 
     Object customize(Response<?> response);
 

@@ -103,7 +103,7 @@ public class ExceptionsHandler {
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<Response<?>> handleMissingServletRequestParameterException(MissingServletRequestParameterException ex) {
         Response<Object> response = Response.business("ExceptionsHandler.MissingServletRequestParameterException")
-          .status(BAD_REQUEST)
+          .i18n().status(BAD_REQUEST)
           .extra("exception", ex.getMessage()).build();
 
         return ResponseEntity.badRequest().body(response);
@@ -112,7 +112,7 @@ public class ExceptionsHandler {
     @ExceptionHandler({HttpMessageNotReadableException.class, IllegalArgumentException.class})
     public ResponseEntity<Response<?>> handleHttpMessageNotReadableException(RuntimeException ex) {
         Response<Object> response = Response.business("ExceptionsHandler.HttpMessageNotReadable")
-          .status(BAD_REQUEST).extra("exception", ex.getMessage()).build();
+          .i18n().status(BAD_REQUEST).extra("exception", ex.getMessage()).build();
 
         return ResponseEntity.badRequest().body(response);
     }
@@ -136,7 +136,7 @@ public class ExceptionsHandler {
             return ResponseEntity.badRequest().body(response);
         } else {
             response = Response.business("ExceptionsHandler.ValidationException").status(BAD_REQUEST)
-              .extra("exception", ex.getMessage()).build();
+              .i18n().extra("exception", ex.getMessage()).build();
         }
         return ResponseEntity.badRequest().body(response);
     }

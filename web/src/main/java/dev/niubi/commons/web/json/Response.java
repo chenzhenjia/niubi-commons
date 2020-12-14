@@ -17,7 +17,6 @@
 package dev.niubi.commons.web.json;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -26,7 +25,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -58,11 +56,11 @@ public class Response<T> {
         public static final String DELETE_FAILURE = "deleteFailure";
     }
 
-    public static class I18nMsgCodes {
-        public static final String SUCCESS = "{Response.success}";
-        public static final String UNKNOWN = "{Response.unknown}";
-        public static final String NOT_FOUND = "{Response.notfound}";
-        public static final String DELETE_FAILURE = "{Response.deleteFailure}";
+    public static class MsgCodes {
+        public static final String SUCCESS = "Response.success";
+        public static final String UNKNOWN = "Response.unknown";
+        public static final String NOT_FOUND = "Response.notfound";
+        public static final String DELETE_FAILURE = "Response.deleteFailure";
     }
 
     private static volatile ObjectMapper objectMapper;
@@ -82,7 +80,7 @@ public class Response<T> {
     /**
      * 状态码
      */
-    private final HttpStatus status;
+    private final Integer status;
     private final String code;
     /**
      * 消息
@@ -93,10 +91,6 @@ public class Response<T> {
      */
     private final T body;
     /**
-     * 时间
-     */
-    private Date timestamp;
-    /**
      * 返回的额外的数据
      */
     private final Map<String, Object> extra;
@@ -104,30 +98,19 @@ public class Response<T> {
     @JsonCreator
     public Response(@JsonProperty("code") String code,
                     @JsonProperty("status") Integer status,
-                    @JsonProperty("body") T body, @JsonProperty("msg") String msg,
+                    @JsonProperty("body") T body,
+                    @JsonProperty("msg") String msg,
                     @JsonProperty("extra") Map<String, Object> extra) {
-        this(code, Optional.ofNullable(status).map(HttpStatus::valueOf).orElse(null), body, msg, extra);
-    }
-
-    public Response(String code, HttpStatus status, T body, String msg,
-                    Map<String, Object> extra) {
-        Objects.requireNonNull(msg, "msg 不能为空");
         Objects.requireNonNull(code, "code 不能为空");
         this.status = status;
         this.msg = msg;
         this.body = body;
         this.code = code;
         this.extra = extra;
-        this.timestamp = new Date();
     }
 
     public int getStatus() {
-        return getHttpStatus().value();
-    }
-
-    @JsonIgnore
-    public HttpStatus getHttpStatus() {
-        return Optional.ofNullable(status).orElse(HttpStatus.OK);
+        return status;
     }
 
     public String getCode() {
@@ -142,10 +125,6 @@ public class Response<T> {
         return body;
     }
 
-    public Date getTimestamp() {
-        return timestamp;
-    }
-
     public Map<String, Object> getExtra() {
         return extra;
     }
@@ -154,16 +133,22 @@ public class Response<T> {
         this.msg = msg;
     }
 
-    void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
-    }
-
     public boolean isSuccess() {
         return Codes.SUCCESS.equals(code);
     }
 
+    @Override
+    public String toString() {
+        return "Response{" +
+          "success=" + isSuccess() +
+          ", status=" + getStatus() +
+          ", code='" + code + '\'' +
+          ", msg='" + msg + '\'' +
+          '}';
+    }
+
     @NotNull
-    public final HashMap<String, Object> toMap() {
+    public HashMap<String, Object> toMap() {
         HashMap<String, Object> map = new HashMap<>();
         if (this.msg != null) {
             map.put("msg", this.getMsg());
@@ -171,14 +156,9 @@ public class Response<T> {
         if (this.extra != null) {
             map.put("extra", this.extra);
         }
-        Date timestamp = this.timestamp;
-        if (timestamp == null) {
-            timestamp = new Date();
-        }
         map.put("status", getStatus());
         map.put("code", this.code);
         map.put("body", this.body);
-        map.put("timestamp", timestamp);
         map.put("success", this.isSuccess());
         return map;
     }
@@ -218,7 +198,7 @@ public class Response<T> {
     }
 
     public static Builder ok() {
-        return ok(I18nMsgCodes.SUCCESS);
+        return ok(MsgCodes.SUCCESS).i18n();
     }
 
     public static Builder business(String msg) {
@@ -234,7 +214,7 @@ public class Response<T> {
     }
 
     public static Builder deleteFailure() {
-        return deleteFailure(I18nMsgCodes.DELETE_FAILURE);
+        return deleteFailure(MsgCodes.DELETE_FAILURE).i18n();
     }
 
     public static Builder deleteFailure(String msg) {
@@ -250,7 +230,7 @@ public class Response<T> {
     }
 
     public static Builder notfound() {
-        return notfound(I18nMsgCodes.NOT_FOUND);
+        return notfound(MsgCodes.NOT_FOUND).i18n();
     }
 
     public static Builder notfound(String msg) {
@@ -262,7 +242,7 @@ public class Response<T> {
     }
 
     public static Builder unknown() {
-        return unknown(I18nMsgCodes.UNKNOWN);
+        return unknown(MsgCodes.UNKNOWN).i18n();
     }
 
     public static Builder copy(Response<?> response) {
@@ -283,6 +263,10 @@ public class Response<T> {
          * 消息
          */
         private String msg;
+        /**
+         * 是否启用了i18n
+         */
+        private boolean i18n = false;
         /**
          * 返回的额外的数据
          */
@@ -322,9 +306,16 @@ public class Response<T> {
             return this;
         }
 
+        public Builder i18n() {
+            if (Objects.nonNull(msg)) {
+                this.i18n = !this.i18n;
+            }
+            return this;
+        }
+
         public Builder with(Response<?> response) {
             return msg(response.msg)
-              .status(response.getHttpStatus())
+              .status(HttpStatus.valueOf(response.getStatus()))
               .extra(response.extra)
               ;
         }
@@ -334,7 +325,7 @@ public class Response<T> {
         }
 
         public <T> Response<T> body(T body) {
-            return new Response<>(Optional.ofNullable(code).orElse(Codes.UNKNOWN), status, body, msg, extra);
+            return new SpringMvcResponse<>(Optional.ofNullable(code).orElse(Codes.UNKNOWN), status, body, msg, extra, i18n);
         }
     }
 

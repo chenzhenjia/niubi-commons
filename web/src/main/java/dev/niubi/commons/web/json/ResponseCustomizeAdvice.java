@@ -59,10 +59,15 @@ public class ResponseCustomizeAdvice implements ResponseBodyAdvice<Object> {
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
         if (Objects.nonNull(body) && body instanceof Response) {
             Response<?> responseBody = (Response<?>) body;
-            response.setStatusCode(responseBody.getHttpStatus());
-            responseBody.setTimestamp(new Date());
-            responseBody.setMsg(messageCodeFormatter.getMsg(responseBody.getMsg()));
-            return responseCustomizer.customize((Response<?>) body);
+            if (responseBody instanceof SpringMvcResponse) {
+                SpringMvcResponse<?> springMvcResponse = (SpringMvcResponse<?>) responseBody;
+                response.setStatusCode(springMvcResponse.getHttpStatus());
+                springMvcResponse.setTimestamp(new Date());
+                if (springMvcResponse.isI18n()) {
+                    responseBody.setMsg(messageCodeFormatter.getMsg(responseBody.getMsg()));
+                }
+            }
+            return responseCustomizer.customize(responseBody);
         }
         return body;
     }
