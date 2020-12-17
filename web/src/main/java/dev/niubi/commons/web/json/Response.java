@@ -41,7 +41,7 @@ public class Response<T> {
   /**
    * 状态码
    */
-  private final Integer status;
+  private final int status;
   private final String code;
   /**
    * 内容
@@ -62,7 +62,7 @@ public class Response<T> {
       @JsonProperty("msg") String msg,
       @JsonProperty("extra") Map<String, Object> extra) {
     Objects.requireNonNull(code, "code 不能为空");
-    this.status = status;
+    this.status = Optional.ofNullable(status).orElse(200);
     this.msg = msg;
     this.body = body;
     this.code = code;
@@ -86,7 +86,8 @@ public class Response<T> {
   }
 
   public static Builder ok(String msg) {
-    return new Builder(Codes.SUCCESS).status(HttpStatus.OK).msg(msg);
+    return new Builder(Codes.SUCCESS)
+        .status(HttpStatus.OK).msg(msg);
   }
 
   public static Builder ok() {
@@ -324,7 +325,10 @@ public class Response<T> {
     }
 
     public <T> Response<T> body(T body) {
-      return new SpringMvcResponse<>(Optional.ofNullable(code).orElse(Codes.UNKNOWN), status, body, msg, extra, i18n);
+      String code = Optional.ofNullable(this.code).orElse(Codes.UNKNOWN);
+      HttpStatus status = Optional.ofNullable(this.status).orElse(HttpStatus.OK);
+      return new SpringMvcResponse<>(code,
+          status, body, msg, extra, i18n);
     }
   }
 }

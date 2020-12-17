@@ -17,6 +17,8 @@
 package dev.niubi.commons.web.error.exception;
 
 import dev.niubi.commons.web.json.Response;
+import dev.niubi.commons.web.json.Response.Codes;
+import java.util.Optional;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -36,25 +38,24 @@ public class BusinessException extends RuntimeException {
     this(response.getMsg(), response.getCode(), HttpStatus.valueOf(response.getStatus()));
   }
 
+  public BusinessException(String message) {
+    this(message, Codes.BUSINESS);
+  }
+
   public BusinessException(String message, String code) {
     this(message, code, null);
+  }
+
+  public BusinessException(String message,
+      HttpStatus status) {
+    this(message, Codes.BUSINESS, status);
   }
 
   public BusinessException(String message, String code,
       HttpStatus status) {
     super(message);
     this.code = code;
-    this.status = status;
-  }
-
-  public BusinessException(String message,
-      HttpStatus status) {
-    super(message);
-    this.status = status;
-  }
-
-  public BusinessException(String message) {
-    super(message);
+    this.status = Optional.ofNullable(status).orElse(HttpStatus.OK);
   }
 
   public HttpStatus getStatus() {
