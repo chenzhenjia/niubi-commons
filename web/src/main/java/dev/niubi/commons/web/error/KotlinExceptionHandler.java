@@ -28,9 +28,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @author chenzhenjia
@@ -47,7 +47,8 @@ public class KotlinExceptionHandler {
   }
 
   @ExceptionHandler(MissingKotlinParameterException.class)
-  public ResponseEntity<Response<?>> handleMissingKotlinParameter(MissingKotlinParameterException e) {
+  @ResponseBody
+  public Response<Object> handleMissingKotlinParameter(MissingKotlinParameterException e) {
     List<JsonMappingException.Reference> path = e.getPath();
     String nullFieldName = path.stream().findFirst()
         .map(JsonMappingException.Reference::getFieldName)
@@ -62,9 +63,8 @@ public class KotlinExceptionHandler {
         })
         .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey,
             AbstractMap.SimpleEntry::getValue));
-    Response<Object> response = Response.business(msg)
+    return Response.business(msg)
         .extra(extra)
         .status(BAD_REQUEST).build();
-    return ResponseEntity.badRequest().body(response);
   }
 }

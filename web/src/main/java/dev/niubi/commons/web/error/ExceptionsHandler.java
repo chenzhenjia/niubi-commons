@@ -30,8 +30,6 @@ import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -41,6 +39,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 /**
@@ -52,9 +51,10 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 public class ExceptionsHandler {
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<?> handleBindingErrors(MethodArgumentNotValidException ex) {
+  @ResponseBody
+  public Response<?> handleBindingErrors(MethodArgumentNotValidException ex) {
     BindingResult bindingResult = ex.getBindingResult();
-    return ResponseEntity.badRequest().body(bindingResultResponseMessage(bindingResult));
+    return bindingResultResponseMessage(bindingResult);
   }
 
   protected Response<?> bindingResultResponseMessage(BindingResult bindingResult) {
@@ -88,43 +88,41 @@ public class ExceptionsHandler {
   }
 
   @ExceptionHandler(BusinessException.class)
-  public ResponseEntity<Response<?>> handleBusinessException(BusinessException ex) {
+  @ResponseBody
+  public Response<Object> handleBusinessException(BusinessException ex) {
     log.debug("处理业务异常", ex);
-    Response<Object> response = Response.business(ex.getCode()).msg(ex.getMessage())
-        .status(ex.getStatus()).build();
-    HttpStatus status = ex.getStatus();
-    if (Objects.isNull(status)) {
-      status = HttpStatus.OK;
-    }
-    return ResponseEntity.status(status).body(response);
+    return Response.business(ex.getCode()).msg(ex.getMessage())
+        .i18n().status(ex.getStatus()).build();
   }
 
   @ExceptionHandler(MissingServletRequestParameterException.class)
-  public ResponseEntity<Response<?>> handleMissingServletRequestParameterException(
+  @ResponseBody
+  public Response<Object> handleMissingServletRequestParameterException(
       MissingServletRequestParameterException ex) {
-    Response<Object> response = Response.business("ExceptionsHandler.MissingServletRequestParameterException")
+
+    return Response.business("ExceptionsHandler.MissingServletRequestParameterException")
         .i18n().status(BAD_REQUEST)
         .extra("exception", ex.getMessage()).build();
-
-    return ResponseEntity.badRequest().body(response);
   }
 
   @ExceptionHandler({HttpMessageNotReadableException.class, IllegalArgumentException.class})
-  public ResponseEntity<Response<?>> handleHttpMessageNotReadableException(RuntimeException ex) {
-    Response<Object> response = Response.business("ExceptionsHandler.HttpMessageNotReadable")
-        .i18n().status(BAD_REQUEST).extra("exception", ex.getMessage()).build();
+  @ResponseBody
+  public Response<Object> handleHttpMessageNotReadableException(RuntimeException ex) {
 
-    return ResponseEntity.badRequest().body(response);
+    return Response.business("ExceptionsHandler.HttpMessageNotReadable")
+        .i18n().status(BAD_REQUEST).extra("exception", ex.getMessage()).build();
   }
 
   @ExceptionHandler(BindException.class)
-  public ResponseEntity<Response<?>> handleBindException(BindException ex) {
+  @ResponseBody
+  public Response<?> handleBindException(BindException ex) {
     BindingResult bindingResult = ex.getBindingResult();
-    return ResponseEntity.badRequest().body(bindingResultResponseMessage(bindingResult));
+    return bindingResultResponseMessage(bindingResult);
   }
 
   @ExceptionHandler(ValidationException.class)
-  public ResponseEntity<Response<?>> handleValidationException(ValidationException ex) {
+  @ResponseBody
+  public Response<Object> handleValidationException(ValidationException ex) {
     Response<Object> response;
     if (ex instanceof ConstraintViolationException) {
       ConstraintViolationException cex = (ConstraintViolationException) ex;
@@ -133,17 +131,17 @@ public class ExceptionsHandler {
           .collect(Collectors.toMap(v -> v.getPropertyPath().toString(), ConstraintViolation::getMessage));
       String msg = errorMap.values().stream().findFirst().orElse(null);
       response = Response.business(msg).status(BAD_REQUEST).extra(errorMap).build();
-      return ResponseEntity.badRequest().body(response);
+      return response;
     } else {
       response = Response.business("ExceptionsHandler.ValidationException").status(BAD_REQUEST)
           .i18n().extra("exception", ex.getMessage()).build();
     }
-    return ResponseEntity.badRequest().body(response);
+    return response;
   }
 
   @ExceptionHandler(NoHandlerFoundException.class)
-  public ResponseEntity<Response<?>> noHandlerFoundException(NoHandlerFoundException ex) {
-    Response<Object> response = Response.notfound().extra("exception", ex.getMessage()).build();
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+  @ResponseBody
+  public Response<Object> noHandlerFoundException(NoHandlerFoundException ex) {
+    return Response.notfound().extra("exception", ex.getMessage()).build();
   }
 }
