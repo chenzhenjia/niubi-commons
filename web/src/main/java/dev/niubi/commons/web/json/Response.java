@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 陈圳佳
+ * Copyright 2021 陈圳佳
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ public class Response<T> {
    * 消息
    */
   private String msg;
+
   @JsonCreator
   public Response(@JsonProperty("code") String code,
       @JsonProperty("status") Integer status,
@@ -87,11 +88,11 @@ public class Response<T> {
 
   public static Builder ok(String msg) {
     return new Builder(Codes.SUCCESS)
-        .status(HttpStatus.OK).msg(msg);
+        .status(200).msg(msg);
   }
 
   public static Builder ok() {
-    return ok(MsgCodes.SUCCESS).i18n();
+    return ok(MsgCodes.SUCCESS);
   }
 
   public static Builder business(String msg) {
@@ -107,7 +108,7 @@ public class Response<T> {
   }
 
   public static Builder deleteFailure() {
-    return deleteFailure(MsgCodes.DELETE_FAILURE).i18n();
+    return deleteFailure(MsgCodes.DELETE_FAILURE);
   }
 
   public static Builder deleteFailure(String msg) {
@@ -123,7 +124,7 @@ public class Response<T> {
   }
 
   public static Builder notfound() {
-    return notfound(MsgCodes.NOT_FOUND).i18n();
+    return notfound(MsgCodes.NOT_FOUND);
   }
 
   public static Builder notfound(String msg) {
@@ -135,7 +136,7 @@ public class Response<T> {
   }
 
   public static Builder unknown() {
-    return unknown(MsgCodes.UNKNOWN).i18n();
+    return unknown(MsgCodes.UNKNOWN);
   }
 
   public static Builder copy(Response<?> response) {
@@ -247,10 +248,10 @@ public class Response<T> {
 
   public static class MsgCodes {
 
-    public static final String SUCCESS = "Response.success";
-    public static final String UNKNOWN = "Response.unknown";
-    public static final String NOT_FOUND = "Response.notfound";
-    public static final String DELETE_FAILURE = "Response.deleteFailure";
+    public static final String SUCCESS = "{Response.success}";
+    public static final String UNKNOWN = "{Response.unknown}";
+    public static final String NOT_FOUND = "{Response.notfound}";
+    public static final String DELETE_FAILURE = "{Response.deleteFailure}";
   }
 
   public static class Builder {
@@ -263,10 +264,6 @@ public class Response<T> {
      * 消息
      */
     private String msg;
-    /**
-     * 是否启用了i18n
-     */
-    private boolean i18n = false;
     /**
      * 返回的额外的数据
      */
@@ -301,21 +298,19 @@ public class Response<T> {
       return this;
     }
 
+    public Builder status(int status) {
+      this.status = HttpStatus.resolve(status);
+      return this;
+    }
+
     public Builder status(HttpStatus status) {
       this.status = status;
       return this;
     }
 
-    public Builder i18n() {
-      if (Objects.nonNull(msg)) {
-        this.i18n = !this.i18n;
-      }
-      return this;
-    }
-
     public Builder with(Response<?> response) {
       return msg(response.msg)
-          .status(HttpStatus.valueOf(response.getStatus()))
+          .status(response.getStatus())
           .extra(response.extra)
           ;
     }
@@ -328,7 +323,7 @@ public class Response<T> {
       String code = Optional.ofNullable(this.code).orElse(Codes.UNKNOWN);
       HttpStatus status = Optional.ofNullable(this.status).orElse(HttpStatus.OK);
       return new SpringMvcResponse<>(code,
-          status, body, msg, extra, i18n);
+          status, body, msg, extra);
     }
   }
 }

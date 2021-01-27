@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 陈圳佳
+ * Copyright 2021 陈圳佳
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,12 @@ package dev.niubi.commons.web.json;
 import dev.niubi.commons.web.json.i18n.ResponseMessageCodeFormatter;
 import java.lang.reflect.Method;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -49,28 +51,36 @@ public class ResponseCustomizeAdvice implements ResponseBodyAdvice<Object> {
 
   @Override
   public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-    return Optional.ofNullable(returnType.getMethod())
-        .map(Method::getReturnType)
-        .map(c -> c.isAssignableFrom(Response.class))
+    Optional<? extends Class<?>> optionalClass = Optional.ofNullable(returnType.getMethod())
+        .map(Method::getReturnType);
+    Boolean b = optionalClass.map(ResponseEntity.class::isAssignableFrom)
         .orElse(false);
+    Boolean b1 = optionalClass
+        .map(Response.class::isAssignableFrom)
+        .orElse(false);
+    return b1 || b;
   }
 
   @Override
   public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType,
       Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request,
       ServerHttpResponse response) {
-    if (Objects.nonNull(body) && body instanceof Response) {
-      Response<?> responseBody = (Response<?>) body;
-      if (responseBody instanceof SpringMvcResponse) {
-        SpringMvcResponse<?> springMvcResponse = (SpringMvcResponse<?>) responseBody;
-        response.setStatusCode(springMvcResponse.getHttpStatus());
-        springMvcResponse.setTimestamp(new Date());
-        if (springMvcResponse.isI18n()) {
-          responseBody.setMsg(messageCodeFormatter.getMsg(responseBody.getMsg()));
-        }
-      }
-      return responseCustomizer.customize(responseBody);
+    if (Objects.isNull(body)) {
+      return null;
     }
-    return body;
+    Response<?> responseBody = null;
+    if (body instanceof Response) {
+      responseBody = (Response<?>) body;
+    }
+    if (Objects.isNull(responseBody)) {
+      return body;
+    }
+    if (responseBody instanceof SpringMvcResponse) {
+      response.setStatusCode(((SpringMvcResponse<?>) responseBody).getHttpStatus());
+    }
+    HashMap<String, Object> map = responseBody.toMap();
+    map.put("timestamp", new Date());
+    map.put("msg", messageCodeFormatter.getMsg(responseBody.getMsg()));
+    return responseCustomizer.customize(map);
   }
 }

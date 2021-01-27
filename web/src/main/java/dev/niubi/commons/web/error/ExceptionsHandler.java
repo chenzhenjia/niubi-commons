@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 陈圳佳
+ * Copyright 2021 陈圳佳
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ public class ExceptionsHandler {
   public Response<Object> handleBusinessException(BusinessException ex) {
     log.debug("处理业务异常", ex);
     return Response.business(ex.getCode()).msg(ex.getMessage())
-        .i18n().status(ex.getStatus()).build();
+        .status(ex.getStatus()).build();
   }
 
   @ExceptionHandler(MissingServletRequestParameterException.class)
@@ -100,8 +100,8 @@ public class ExceptionsHandler {
   public Response<Object> handleMissingServletRequestParameterException(
       MissingServletRequestParameterException ex) {
 
-    return Response.business("ExceptionsHandler.MissingServletRequestParameterException")
-        .i18n().status(BAD_REQUEST)
+    return Response.business("{ExceptionsHandler.MissingServletRequestParameterException}")
+        .status(BAD_REQUEST)
         .extra("exception", ex.getMessage()).build();
   }
 
@@ -109,8 +109,8 @@ public class ExceptionsHandler {
   @ResponseBody
   public Response<Object> handleHttpMessageNotReadableException(RuntimeException ex) {
 
-    return Response.business("ExceptionsHandler.HttpMessageNotReadable")
-        .i18n().status(BAD_REQUEST).extra("exception", ex.getMessage()).build();
+    return Response.business("{ExceptionsHandler.HttpMessageNotReadable}")
+        .status(BAD_REQUEST).extra("exception", ex.getMessage()).build();
   }
 
   @ExceptionHandler(BindException.class)
@@ -133,8 +133,8 @@ public class ExceptionsHandler {
       response = Response.business(msg).status(BAD_REQUEST).extra(errorMap).build();
       return response;
     } else {
-      response = Response.business("ExceptionsHandler.ValidationException").status(BAD_REQUEST)
-          .i18n().extra("exception", ex.getMessage()).build();
+      response = Response.business("{ExceptionsHandler.ValidationException}").status(BAD_REQUEST)
+          .extra("exception", ex.getMessage()).build();
     }
     return response;
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 陈圳佳
+ * Copyright 2021 陈圳佳
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package dev.niubi.commons.web.json.i18n;
 
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 
@@ -26,8 +28,9 @@ import org.springframework.context.i18n.LocaleContextHolder;
  */
 public class DefaultMessageCodeFormatter implements ResponseMessageCodeFormatter {
 
-  public static final String NOT_FOUND_MESSAGE = "AbstractResponseMsgFormatter.NotFound";
   private final MessageSource messageSource;
+  private static final Pattern REGX = Pattern.compile("(\\{[a-zA-Z._]+})");
+  private static final Pattern KEY_REGX = Pattern.compile("^\\{|}$");
 
   public DefaultMessageCodeFormatter(MessageSource messageSource) {
     this.messageSource = messageSource;
@@ -38,10 +41,20 @@ public class DefaultMessageCodeFormatter implements ResponseMessageCodeFormatter
     if (Objects.isNull(msg)) {
       return null;
     }
-    String message = messageSource.getMessage(msg, new Object[] {}, NOT_FOUND_MESSAGE, LocaleContextHolder.getLocale());
-    if (NOT_FOUND_MESSAGE.equals(message)) {
-      return msg;
+    String replacedMsg = msg;
+    Matcher matcher = REGX.matcher(msg);
+    while (matcher.find()) {
+      String key = matcher.group();
+      key = KEY_REGX.matcher(key).replaceAll("");
+      int start = matcher.start();
+      int end = matcher.end();
+      String message = messageSource
+          .getMessage(key, new Object[] {}, null, LocaleContextHolder.getLocale());
+      if (Objects.isNull(message)) {
+        continue;
+      }
+      replacedMsg = replacedMsg.replace(msg.substring(start, end), message);
     }
-    return message;
+    return replacedMsg;
   }
 }

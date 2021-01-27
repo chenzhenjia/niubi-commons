@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 陈圳佳
+ * Copyright 2021 陈圳佳
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public class KotlinExceptionHandler {
     String nullFieldName = path.stream().findFirst()
         .map(JsonMappingException.Reference::getFieldName)
         .orElse(null);
-    String notNull = responseMessageCodeFormatter.getMsg("KotlinExceptionHandler.notNull");
+    String notNull = responseMessageCodeFormatter.getMsg("{KotlinExceptionHandler.notNull}");
     String msg = String.format("[%s]%s", nullFieldName, notNull);
     Map<String, String> extra = path.stream()
         .map(JsonMappingException.Reference::getFieldName)

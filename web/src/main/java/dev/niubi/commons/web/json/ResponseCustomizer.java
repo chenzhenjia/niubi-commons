@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 陈圳佳
+ * Copyright 2021 陈圳佳
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package dev.niubi.commons.web.json;
 
+import java.util.Map;
+
 /**
  * @author chenzhenjia
  * @since 2019/12/11
@@ -24,5 +26,5 @@ public interface ResponseCustomizer {
 
   ResponseCustomizer DEFAULT = response -> response;
 
-  Object customize(Response<?> response);
+  Object customize(Map<String, Object> response);
 }
