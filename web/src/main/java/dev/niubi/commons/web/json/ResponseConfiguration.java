@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 陈圳佳
+ * Copyright 2021 陈圳佳
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,10 +41,8 @@ public class ResponseConfiguration {
 
   @Bean
   @Lazy(false)
-  public ResponseCustomizeAdvice responseAdvice(ObjectProvider<ResponseCustomizer> responseCustomizers,
-      ResponseMessageCodeFormatter messageCodeFormatter) {
-    return new ResponseCustomizeAdvice(responseCustomizers.getIfAvailable(() -> ResponseCustomizer.DEFAULT),
-        messageCodeFormatter);
+  public ResponseCustomizeAdvice responseAdvice(ResponseCustomizer responseCustomizer) {
+    return new ResponseCustomizeAdvice(responseCustomizer);
   }
 
   protected MessageSource messageSource() {
@@ -53,6 +51,12 @@ public class ResponseConfiguration {
     messageSource.setDefaultEncoding("UTF-8");
     messageSource.setFallbackToSystemLocale(true);
     return messageSource;
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  public ResponseCustomizer defaultResponseCustomizer(ResponseMessageCodeFormatter messageCodeFormatter) {
+    return new DefaultResponseCustomizer(messageCodeFormatter);
   }
 
   @Bean
@@ -66,9 +70,11 @@ public class ResponseConfiguration {
   }
 
   @Bean
-  public ApplicationListener<ContextRefreshedEvent> responseContextInitFinishListener(ObjectMapper objectMapper) {
+  public ApplicationListener<ContextRefreshedEvent> responseContextInitFinishListener(ObjectMapper objectMapper,
+      ResponseCustomizer responseCustomizer) {
     return event -> {
       Response.setObjectMapper(objectMapper);
+      Response.setResponseCustomizer(responseCustomizer);
     };
   }
 }

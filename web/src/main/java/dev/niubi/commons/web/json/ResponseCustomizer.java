@@ -16,8 +16,6 @@
 
 package dev.niubi.commons.web.json;
 
-import java.util.Map;
-
 /**
  * @author chenzhenjia
  * @since 2019/12/11
@@ -26,5 +24,5 @@ public interface ResponseCustomizer {
 
   ResponseCustomizer DEFAULT = response -> response;
 
-  Object customize(Map<String, Object> response);
+  Object customize(Response<?> response);
 }

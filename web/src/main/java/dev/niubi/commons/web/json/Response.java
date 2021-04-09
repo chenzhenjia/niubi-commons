@@ -38,6 +38,7 @@ import org.springframework.http.MediaType;
 public class Response<T> {
 
   private static volatile ObjectMapper objectMapper;
+  private static volatile ResponseCustomizer responseCustomizer;
   /**
    * 状态码
    */
@@ -76,10 +77,21 @@ public class Response<T> {
     }
     return objectMapper;
   }
+ private synchronized static ResponseCustomizer getResponseCustomizer() {
+    if (responseCustomizer == null) {
+      responseCustomizer = ResponseCustomizer.DEFAULT;
+    }
+    return responseCustomizer;
+  }
 
   static synchronized void setObjectMapper(ObjectMapper newObjectMapper) {
     Objects.requireNonNull(newObjectMapper, "ObjectMapper 不能为空");
     objectMapper = newObjectMapper;
+  }
+
+  static synchronized void setResponseCustomizer(ResponseCustomizer responseCustomizer) {
+    Objects.requireNonNull(responseCustomizer, "responseCustomizer 不能为空");
+    Response.responseCustomizer = responseCustomizer;
   }
 
   public static <T> Response<T> ok(T body) {
@@ -219,7 +231,7 @@ public class Response<T> {
   }
 
   public void write(ObjectMapper objectMapper, HttpServletResponse response) throws IOException {
-    HashMap<String, Object> value = writeHeader(response).toMap();
+    Object value = getResponseCustomizer().customize(writeHeader(response));
     objectMapper.writeValue(response.getWriter(), value);
   }
 

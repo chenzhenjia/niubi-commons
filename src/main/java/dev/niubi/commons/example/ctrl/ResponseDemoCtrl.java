@@ -17,6 +17,8 @@
 package dev.niubi.commons.example.ctrl;
 
 import dev.niubi.commons.web.json.Response;
+import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,5 +45,10 @@ public class ResponseDemoCtrl {
   @GetMapping("entity")
   public ResponseEntity<Response<Object>> entity() {
     return ResponseEntity.badRequest().body(Response.ok("测试").build());
+  }
+
+  @GetMapping("write")
+  public void write(HttpServletResponse response) throws IOException {
+    Response.ok().build().write(response);
   }
 }

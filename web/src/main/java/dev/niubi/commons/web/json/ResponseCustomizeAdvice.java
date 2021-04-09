@@ -16,10 +16,7 @@
 
 package dev.niubi.commons.web.json;
 
-import dev.niubi.commons.web.json.i18n.ResponseMessageCodeFormatter;
 import java.lang.reflect.Method;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
 import org.springframework.core.MethodParameter;
@@ -41,12 +38,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 public class ResponseCustomizeAdvice implements ResponseBodyAdvice<Object> {
 
   private final ResponseCustomizer responseCustomizer;
-  private final ResponseMessageCodeFormatter messageCodeFormatter;
 
-  public ResponseCustomizeAdvice(ResponseCustomizer responseCustomizer,
-      ResponseMessageCodeFormatter messageCodeFormatter) {
+  public ResponseCustomizeAdvice(ResponseCustomizer responseCustomizer) {
     this.responseCustomizer = responseCustomizer;
-    this.messageCodeFormatter = messageCodeFormatter;
   }
 
   @Override
@@ -78,9 +72,6 @@ public class ResponseCustomizeAdvice implements ResponseBodyAdvice<Object> {
     if (responseBody instanceof SpringMvcResponse) {
       response.setStatusCode(((SpringMvcResponse<?>) responseBody).getHttpStatus());
     }
-    HashMap<String, Object> map = responseBody.toMap();
-    map.put("timestamp", new Date());
-    map.put("msg", messageCodeFormatter.getMsg(responseBody.getMsg()));
-    return responseCustomizer.customize(map);
+    return responseCustomizer.customize(responseBody);
   }
 }
