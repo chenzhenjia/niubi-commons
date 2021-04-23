@@ -172,7 +172,7 @@ public class Response<T> {
     return msg;
   }
 
-  void setMsg(String msg) {
+  public void setMsg(String msg) {
     this.msg = msg;
   }
 

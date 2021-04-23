@@ -17,8 +17,6 @@
 package dev.niubi.commons.web.json;
 
 import dev.niubi.commons.web.json.i18n.ResponseMessageCodeFormatter;
-import java.util.Date;
-import java.util.HashMap;
 
 /**
  * @author chenzhenjia
@@ -34,9 +32,8 @@ public class DefaultResponseCustomizer implements ResponseCustomizer {
   }
 
   public Object customize(Response<?> response) {
-    HashMap<String, Object> map = response.toMap();
-    map.put("timestamp", new Date());
-    map.put("msg", responseMessageCodeFormatter.getMsg(response.getMsg()));
-    return map;
+    String msg = responseMessageCodeFormatter.getMsg(response.getMsg());
+    response.setMsg(msg);
+    return response;
   }
 }

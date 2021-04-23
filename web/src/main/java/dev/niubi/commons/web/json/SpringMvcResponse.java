@@ -17,6 +17,7 @@
 package dev.niubi.commons.web.json;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
@@ -28,16 +29,21 @@ import org.springframework.http.HttpStatus;
 public class SpringMvcResponse<T> extends Response<T> {
 
   private final HttpStatus status;
+  private final Date timestamp;
 
   public SpringMvcResponse(String code, HttpStatus status, T body,
       String msg, Map<String, Object> extra) {
     super(code, status.value(), body, msg, extra);
     this.status = status;
+    this.timestamp = new Date();
+  }
+
+  public Date getTimestamp() {
+    return timestamp;
   }
 
   @JsonIgnore
   public HttpStatus getHttpStatus() {
     return Optional.ofNullable(status).orElse(HttpStatus.OK);
   }
-
 }
